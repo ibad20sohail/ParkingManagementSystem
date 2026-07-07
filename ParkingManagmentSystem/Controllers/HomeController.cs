@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using ParkingManagmentSystem.Models;
+using ParkingManagmentSystem.Models.ViewModels.Common;
 using System.Diagnostics;
 
 namespace ParkingManagmentSystem.Controllers
