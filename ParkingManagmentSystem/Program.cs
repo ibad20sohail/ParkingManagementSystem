@@ -1,9 +1,13 @@
-using ParkingManagmentSystem.Middlewares;
+using ParkingManagmentSystem.ExceptionHandler;
+using ParkingManagmentSystem.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<GlobalLoggingFilter>();
+});
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -21,8 +25,6 @@ app.UseExceptionHandler();  //Global exception handler
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
-app.UseMiddleware<LoggingMiddleware>();
 
 app.UseAuthorization();
 

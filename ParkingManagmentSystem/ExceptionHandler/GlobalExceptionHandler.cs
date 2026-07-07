@@ -1,9 +1,7 @@
-﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ParkingManagmentSystem.Middlewares
+namespace ParkingManagmentSystem.ExceptionHandler
 {
     public partial class GlobalExceptionHandler : IExceptionHandler
     {
@@ -22,7 +20,7 @@ namespace ParkingManagmentSystem.Middlewares
             {
                 Status = StatusCodes.Status500InternalServerError,
                 Title = "An unexpected error occurred",
-                Detail = exception.Message, 
+                Detail = exception.Message,
                 Instance = httpContext.Request.Path
             };
 
