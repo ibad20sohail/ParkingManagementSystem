@@ -1,4 +1,4 @@
-namespace ParkingManagmentSystem.Models
+namespace ParkingManagmentSystem.Models.ViewModels.Common
 {
     public class ErrorViewModel
     {
