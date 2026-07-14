@@ -1,3 +1,7 @@
 <Solution>
-  <Project Path="ParkingManagementSystem/ParkingManagementSystem.csproj" />
+  <Project Path="PMS.Web/PMS.Web.csproj" />
+  <Project Path="PMS.Application/PMS.Application.csproj" />
+  <Project Path="PMS.CodeGenerator/PMS.CodeGenerator.csproj" />
+  <Project Path="PMS.Domain/PMS.Domain.csproj" />
+  <Project Path="PMS.Infrastructure/PMS.Infrastructure.csproj" />
 </Solution>
