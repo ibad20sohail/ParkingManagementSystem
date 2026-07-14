@@ -1,6 +1,6 @@
-CREATE DATABASE ParkingManagment;
+CREATE DATABASE ParkingManagementSystem;
 GO
-USE ParkingManagment;
+USE ParkingManagementSystem;
 GO
 --TABLES START--
 GO
@@ -19,16 +19,17 @@ CREATE TABLE Roles
 	Name VARCHAR(20) NOT NULL UNIQUE
 );
 GO
-CREATE TABLE ParkedVehicles
+CREATE TABLE Tickets
 (
 	Id INT PRIMARY KEY IDENTITY(1,1),
-	Ticket VARCHAR(50) NOT NULL UNIQUE,
 	LicenseNo VARCHAR(30) NOT NULL,
 	DriverName VARCHAR(30) NULL,
 	Company VARCHAR(20) NULL,
 	Model VARCHAR(30) NULL,
-	Entered_At DATETIME2 NULL,
-	Exit_AT DATETIME2 NULL,
+	Issued_At DATETIME2 NOT NULL DEFAULT(GETUTCDATE()),
+	Expires_At DATETIME2 NULL,
+	Is_Used BIT DEFAULT 0,
+
 	CategoryId INT NOT NULL,
 	ParkingSpaceId INT NULL,
 	UserId INT NOT NULL
@@ -37,8 +38,7 @@ GO
 CREATE TABLE Categories
 (
 	Id INT PRIMARY KEY IDENTITY(1,1),
-	Name VARCHAR(30) NOT NULL UNIQUE,
-	Cost DECIMAL(6,2) NOT NULL
+	Name VARCHAR(30) NOT NULL UNIQUE
 );
 GO
 CREATE TABLE ParkingSpaces
@@ -58,8 +58,9 @@ GO
 CREATE TABLE Billings
 (
 	Id INT PRIMARY KEY IDENTITY(1,1),
-	VehicleId INT NOT NULL,
+	TicketId INT NOT NULL,
 	PaymentMethodId INT NOT NUll,
+	Amount DECIMAL(10,2) NULL,
 	CreatedAt DATETIME2 NOT NULL DEFAULT(GETUTCDATE())
 );
 GO
@@ -74,15 +75,15 @@ CREATE TABLE PaymentMethods
 GO
 ALTER TABLE Users ADD CONSTRAINT FK_Users_Roles FOREIGN KEY (RoleId) REFERENCES Roles(Id) ON DELETE NO ACTION;
 GO
-ALTER TABLE Vehicles ADD CONSTRAINT FK_Vehicles_Categories FOREIGN KEY (CategoryId) REFERENCES Categories(Id) ON DELETE NO ACTION;
+ALTER TABLE Tickets ADD CONSTRAINT FK_Tickets_Categories FOREIGN KEY (CategoryId) REFERENCES Categories(Id) ON DELETE NO ACTION;
 GO
-ALTER TABLE Vehicles ADD CONSTRAINT FK_Vehicles_ParkingSpaces FOREIGN KEY (ParkingSpaceId) REFERENCES ParkingSpaces(Id) ON DELETE SET NULL;
+ALTER TABLE Tickets ADD CONSTRAINT FK_Tickets_ParkingSpaces FOREIGN KEY (ParkingSpaceId) REFERENCES ParkingSpaces(Id) ON DELETE SET NULL;
 GO
-ALTER TABLE Vehicles ADD CONSTRAINT FK_Vehicles_Users FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE NO ACTION;
+ALTER TABLE Tickets ADD CONSTRAINT FK_Tickets_Users FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE NO ACTION;
 GO
 ALTER TABLE ParkingSpaces ADD CONSTRAINT FK_ParkingSpaces_ParkingSpaceStatuses FOREIGN KEY (StatusId) REFERENCES ParkingSpaceStatuses(Id) ON DELETE NO ACTION;
 GO
-ALTER TABLE Billings ADD CONSTRAINT FK_Billings_Vehicles FOREIGN KEY (VehicleId) REFERENCES Vehicles(Id) ON DELETE NO ACTION;
+ALTER TABLE Billings ADD CONSTRAINT FK_Billings_Tickets FOREIGN KEY (TicketId) REFERENCES Tickets(Id) ON DELETE NO ACTION;
 GO
 ALTER TABLE Billings ADD CONSTRAINT FK_Billings_PaymentMethods FOREIGN KEY (PaymentMethodId) REFERENCES PaymentMethods(Id) ON DELETE NO ACTION;
 --FOREIGN KEY END--
@@ -231,7 +232,7 @@ BEGIN
 	END CATCH
 END
 GO
-CREATE OR ALTER PROCEDURE SP_AddCategory @Name VARCHAR(30), @Cost DECIMAL(6,2)
+CREATE OR ALTER PROCEDURE SP_AddCategory @Name VARCHAR(30)
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -240,7 +241,7 @@ BEGIN
 		BEGIN
 			RAISERROR('This category is already in category.',16,1);
 		END
-		INSERT INTO Categories(Name, Cost) VALUES (@Name, @Cost);
+		INSERT INTO Categories(Name) VALUES (@Name);
 		SELECT 'Category has been added successfully.' AS Message;
 		RETURN;
 	END TRY
@@ -251,7 +252,7 @@ BEGIN
 	END CATCH
 END
 GO
-CREATE OR ALTER PROCEDURE SP_EditCategory @Id INT, @Name VARCHAR(30) = NULL, @Cost DECIMAL(6,2) = NULL
+CREATE OR ALTER PROCEDURE SP_EditCategory @Id INT, @Name VARCHAR(30) = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -260,7 +261,7 @@ BEGIN
 		BEGIN
 			RAISERROR('This category name is already in category.',16,1);
 		END
-		UPDATE Categories SET Name = @Name, Cost = @Cost WHERE Id = @Id;
+		UPDATE Categories SET Name = @Name WHERE Id = @Id;
 		SELECT 'Category has been updated successfully' AS Message;
 		RETURN;
 	END TRY
@@ -420,7 +421,7 @@ RETURN
 
 --FUNCTION END--
 --INSERT START--
-
-
-
+GO
+INSERT INTO Roles(Name) VALUES ('admin');
+INSERT INTO Roles(Name) VALUES ('operator');
 --INSERT END--

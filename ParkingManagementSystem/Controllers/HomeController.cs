@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using ParkingManagmentSystem.Models.ViewModels.Common;
+using ParkingManagementSystem.Models.ViewModels.Common;
 using System.Diagnostics;
 
-namespace ParkingManagmentSystem.Controllers
+namespace ParkingManagementSystem.Controllers
 {
     public class HomeController : Controller
     {

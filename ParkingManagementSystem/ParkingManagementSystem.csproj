@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <Folder Include="Models\Entities\" />
-    <Folder Include="Services\Implementations\" />
-    <Folder Include="Services\Interfaces\" />
+    <Folder Include="Infrastructure\Services\Implementations\" />
+    <Folder Include="Infrastructure\Services\Interfaces\" />
   </ItemGroup>
 
 </Project>

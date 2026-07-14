@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace ParkingManagmentSystem.Filters
+namespace ParkingManagementSystem.Filters
 {
     public partial class GlobalLoggingFilter : IActionFilter
     {

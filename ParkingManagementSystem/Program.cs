@@ -1,5 +1,5 @@
-using ParkingManagmentSystem.ExceptionHandler;
-using ParkingManagmentSystem.Filters;
+using ParkingManagementSystem.ExceptionHandler;
+using ParkingManagementSystem.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
