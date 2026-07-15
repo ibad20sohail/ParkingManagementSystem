@@ -1,11 +1,11 @@
-﻿namespace PMS.CodeGenerator.Models
+﻿namespace CodeGenerator.Models
 {
-    public class ResultColumnMetadata
+    public class ParameterMetadata
     {
         public string Name { get; set; } = string.Empty;
 
         public string SqlType { get; set; } = string.Empty;
 
-        public bool IsNullable { get; set; }
+        public bool IsOutput { get; set; }
     }
 }

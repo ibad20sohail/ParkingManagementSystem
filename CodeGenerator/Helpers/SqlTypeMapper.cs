@@ -1,4 +1,4 @@
-﻿namespace PMS.CodeGenerator.Helpers;
+﻿namespace CodeGenerator.Helpers;
 
 public static class SqlTypeMapper
 {

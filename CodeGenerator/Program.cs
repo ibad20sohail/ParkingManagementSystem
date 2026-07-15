@@ -1,6 +1,6 @@
-﻿using PMS.CodeGenerator.Database;
-using PMS.CodeGenerator.Generators;
-using PMS.CodeGenerator.Helpers;
+﻿using CodeGenerator.Database;
+using CodeGenerator.Generators;
+using CodeGenerator.Helpers;
 
 string connectionString = "Server=DESKTOP-AT7A4NQ\\SQLEXPRESS;Database=ParkingManagementSystem;Trusted_Connection=True;TrustServerCertificate=True;";
 

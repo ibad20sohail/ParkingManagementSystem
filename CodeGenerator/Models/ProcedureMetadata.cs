@@ -1,4 +1,4 @@
-﻿namespace PMS.CodeGenerator.Models
+﻿namespace CodeGenerator.Models
 {
     public class ProcedureMetadata
     {

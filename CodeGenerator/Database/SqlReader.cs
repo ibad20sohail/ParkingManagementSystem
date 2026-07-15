@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
-using PMS.CodeGenerator.Models;
+using CodeGenerator.Models;
 
-namespace PMS.CodeGenerator.Database
+namespace CodeGenerator.Database
 {
     public class SqlReader
     {

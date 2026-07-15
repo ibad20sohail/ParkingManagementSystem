@@ -1,4 +1,4 @@
-﻿namespace PMS.CodeGenerator.Helpers
+﻿namespace CodeGenerator.Helpers
 {
     public static class SolutionFinder
     {
@@ -8,7 +8,7 @@
 
             while (directory != null)
             {
-                var solution = directory.GetFiles("*.slnx").FirstOrDefault();
+                var solution = directory.GetFiles("ParkingManagementSystem.slnx").FirstOrDefault();
 
                 if (solution != null)
                     return directory.FullName;

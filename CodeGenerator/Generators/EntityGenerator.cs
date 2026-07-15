@@ -1,8 +1,8 @@
 ﻿using Scriban;
-using PMS.CodeGenerator.Models;
-using PMS.CodeGenerator.Helpers;
+using CodeGenerator.Models;
+using CodeGenerator.Helpers;
 
-namespace PMS.CodeGenerator.Generators;
+namespace CodeGenerator.Generators;
 
 public class EntityGenerator
 {
