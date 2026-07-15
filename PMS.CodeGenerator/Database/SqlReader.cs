@@ -12,6 +12,7 @@ namespace PMS.CodeGenerator.Database
             _connectionString = connectionString;
         }
 
+        #region Entity readers
         public async Task<List<string>> GetTablesAsync()
         {
             var tables = new List<string>();
@@ -197,6 +198,36 @@ namespace PMS.CodeGenerator.Database
 
             return tablesMetadata;
         }
+        #endregion
+
+        #region SP readers
+        public async Task<List<string>> GetStoredProceduresAsync()
+        {
+            var procedures = new List<string>();
+
+            using var connection = CreateConnection();
+
+            await connection.OpenAsync();
+
+            var sql = @"
+                SELECT
+                    p.name
+                FROM sys.procedures p
+                WHERE p.is_ms_shipped = 0
+                ORDER BY p.name;";
+
+            using var cmd = new SqlCommand(sql, connection);
+
+            using var reader = await cmd.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                procedures.Add(reader.GetString(0));
+            }
+
+            return procedures;
+        }
+        #endregion 
         private SqlConnection CreateConnection()
         {
             return new SqlConnection(_connectionString);

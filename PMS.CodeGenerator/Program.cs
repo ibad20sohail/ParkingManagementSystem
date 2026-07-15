@@ -16,4 +16,6 @@ var output = Path.Combine(solutionRoot, "PMS.Domain", "Entities");
 
 await entityGenerator.GenerateAsync(tables, output);
 
+
+
 Console.WriteLine("Entities Generated!");
