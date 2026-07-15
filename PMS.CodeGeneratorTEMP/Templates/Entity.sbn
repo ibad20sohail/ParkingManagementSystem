@@ -1,8 +1,0 @@
-﻿namespace PMS.Domain.Entities;
-
-public class {{name}}
-{
-{{ for property in properties }}
-	public {{property.type}} {{property.name}} { get; set; }
-{{ end }}
-}
