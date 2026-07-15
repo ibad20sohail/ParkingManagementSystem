@@ -1,5 +1,6 @@
-﻿using Microsoft.Data.SqlClient;
-using CodeGenerator.Models;
+﻿using CodeGenerator.Models;
+using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace CodeGenerator.Database
 {
@@ -226,6 +227,84 @@ namespace CodeGenerator.Database
             }
 
             return procedures;
+        }
+        public async Task<List<ParameterMetadata>> GetProcedureParametersAsync(string procedureName)
+        {
+            var parameters = new List<ParameterMetadata>();
+
+            using var connection = CreateConnection();
+
+            await connection.OpenAsync();
+
+            var sql = @"
+                SELECT
+                    p.name,
+                    t.name,
+                    p.is_output
+                FROM sys.parameters p
+                JOIN sys.types t
+                    ON p.user_type_id = t.user_type_id
+                WHERE p.object_id = OBJECT_ID(@Procedure)
+                ORDER BY p.parameter_id;";
+
+            using var cmd = new SqlCommand(sql, connection);
+
+            cmd.Parameters.AddWithValue("@Procedure", procedureName);
+
+            using var reader = await cmd.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                parameters.Add(new ParameterMetadata
+                {
+                    Name = reader.GetString(0).TrimStart('@'),
+                    SqlType = reader.GetString(1),
+                    IsOutput = reader.GetBoolean(2)
+                });
+            }
+
+            return parameters;
+        }
+        public async Task<List<ResultColumnMetadata>> GetProcedureResultColumnsAsync(string procedureName)
+        {
+            var columns = new List<ResultColumnMetadata>();
+
+            using var connection = CreateConnection();
+
+            await connection.OpenAsync();
+
+            using var cmd = new SqlCommand("sp_describe_first_result_set", connection);
+
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.AddWithValue(
+                "@tsql",
+                $"EXEC dbo.{procedureName}"
+            );
+
+            using var reader = await cmd.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                // Skip hidden columns
+                if (!reader.IsDBNull(reader.GetOrdinal("is_hidden")) &&
+                    reader.GetBoolean(reader.GetOrdinal("is_hidden")))
+                {
+                    continue;
+                }
+
+                if (reader.IsDBNull(reader.GetOrdinal("name")))
+                    continue;
+
+                columns.Add(new ResultColumnMetadata
+                {
+                    Name = reader["name"].ToString()!,
+                    SqlType = reader["system_type_name"].ToString()!.Split('(')[0],
+                    IsNullable = Convert.ToBoolean(reader["is_nullable"])
+                });
+            }
+
+            return columns;
         }
         #endregion 
         private SqlConnection CreateConnection()
