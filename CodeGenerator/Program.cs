@@ -1,41 +1,28 @@
-﻿using CodeGenerator.Database;
+﻿using CodeGenerator.Constants;
+using CodeGenerator.Database;
 using CodeGenerator.Generators;
 using CodeGenerator.Helpers;
 
-string connectionString = "Server=DESKTOP-AT7A4NQ\\SQLEXPRESS;Database=parking_management_system;Trusted_Connection=True;TrustServerCertificate=True;";
+var solutionRoot = SolutionFinder.FindRoot();
 
-var reader = new SqlReader(connectionString);
+var reader = new SqlReader(Cons.ConnectionString);
 
 var tables = await reader.GetTableMetadataAsync();
 
-var entityPath = Path.GetFullPath(@"Templates\Entity.sbn");
+var entityPath = Path.GetFullPath(Cons.EntityTemplatePath);
 var entityGenerator = new EntityGenerator(entityPath);
+var outputFoEntity = Path.Combine(solutionRoot, Cons.EntityGenerationPath);
+await entityGenerator.GenerateAsync(tables, outputFoEntity);
 
-var solutionRoot = SolutionFinder.FindRoot();
-var output = Path.Combine(solutionRoot, "PMS.Domain", "Entities");
+var procedures = await reader.GetProceduresMetadataAsync();
 
-await entityGenerator.GenerateAsync(tables, output);
+var requestPath = Path.GetFullPath(Cons.RequestTemplatePath);
+var requestGenerator = new RequestGenerator(requestPath);
+var outputForRequest = Path.Combine(solutionRoot, Cons.RequestGenerationPath);
+await requestGenerator.GenerateAsync(procedures, outputForRequest);
 
-//var procedures = await reader.GetStoredProceduresAsync();
-
-//Console.WriteLine($"Procedures: {procedures.Count}");
-
-//foreach (var procedure in procedures)
-//{
-//    Console.WriteLine(procedure);
-//}
-//var parameters = await reader.GetProcedureParametersAsync("AddRole");
-
-//foreach (var parameter in parameters)
-//{
-//    Console.WriteLine($"{parameter.Name} - {parameter.SqlType}");
-//}
-//var result = await reader.GetProcedureResultColumnsAsync("AddRole");
-
-//Console.WriteLine("Result Columns");
-
-//foreach (var column in result)
-//{
-//    Console.WriteLine($"{column.Name} - {column.SqlType}");
-//}
-Console.WriteLine("Entities Generated!");
+var responsePath = Path.GetFullPath(Cons.ResponseTemplatePath);
+var operationResponsePath = Path.GetFullPath(Cons.OperationResponseTemplatePath);
+var responseGenerator = new ResponseGenerator(requestPath, operationResponsePath);
+var outputForResponse = Path.Combine(solutionRoot, Cons.ResponseGenerationPath);
+await responseGenerator.GenerateAsync(procedures, outputForResponse);

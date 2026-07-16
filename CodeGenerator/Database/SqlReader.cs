@@ -1,4 +1,5 @@
-﻿using CodeGenerator.Models;
+﻿using CodeGenerator.Helpers;
+using CodeGenerator.Models;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
@@ -211,11 +212,10 @@ namespace CodeGenerator.Database
             await connection.OpenAsync();
 
             var sql = @"
-                SELECT
-                    p.name
-                FROM sys.procedures p
-                WHERE p.is_ms_shipped = 0
-                ORDER BY p.name;";
+                SELECT ROUTINE_NAME
+                FROM INFORMATION_SCHEMA.ROUTINES
+                WHERE ROUTINE_TYPE = 'PROCEDURE'
+                ORDER BY ROUTINE_NAME";
 
             using var cmd = new SqlCommand(sql, connection);
 
@@ -238,14 +238,17 @@ namespace CodeGenerator.Database
 
             var sql = @"
                 SELECT
-                    p.name,
-                    t.name,
+                    p.name AS ParameterName,
+                    t.name AS DataType,
+                    p.has_default_value,
                     p.is_output
                 FROM sys.parameters p
-                JOIN sys.types t
+                INNER JOIN sys.types t
                     ON p.user_type_id = t.user_type_id
-                WHERE p.object_id = OBJECT_ID(@Procedure)
-                ORDER BY p.parameter_id;";
+                INNER JOIN sys.objects o
+                    ON p.object_id = o.object_id
+                WHERE o.name = @Procedure
+                ORDER BY p.parameter_id";
 
             using var cmd = new SqlCommand(sql, connection);
 
@@ -257,13 +260,39 @@ namespace CodeGenerator.Database
             {
                 parameters.Add(new ParameterMetadata
                 {
-                    Name = reader.GetString(0).TrimStart('@'),
+                    Name = reader.GetString(0).Replace("@", ""),
                     SqlType = reader.GetString(1),
-                    IsOutput = reader.GetBoolean(2)
+                    HasDefaultValue = reader.GetBoolean(2),
+                    IsOutput = reader.GetBoolean(3)
                 });
             }
 
             return parameters;
+        }
+        public async Task<List<ProcedureMetadata>> GetProceduresMetadataAsync()
+        {
+            var procedures = await GetStoredProceduresAsync();
+
+            var result = new List<ProcedureMetadata>();
+
+
+            foreach (var procedure in procedures)
+            {
+                var parsed = ProcedureNameParser.Parse(procedure);
+
+                var parameters = await GetProcedureParametersAsync(procedure);
+                var resultColumns = await GetProcedureResultColumnsAsync(procedure);
+                result.Add(new ProcedureMetadata
+                {
+                    Name = procedure,
+                    Action = parsed.Action,
+                    Entity = parsed.Entity,
+                    Parameters = parameters,
+                    ResultColumns = resultColumns
+                });
+            }
+
+            return result;
         }
         public async Task<List<ResultColumnMetadata>> GetProcedureResultColumnsAsync(string procedureName)
         {
@@ -273,40 +302,39 @@ namespace CodeGenerator.Database
 
             await connection.OpenAsync();
 
-            using var cmd = new SqlCommand("sp_describe_first_result_set", connection);
+            var sql = @"
+                SELECT
+                    name,
+                    system_type_name,
+                    is_nullable
+                FROM sys.dm_exec_describe_first_result_set_for_object
+                (
+                    OBJECT_ID(@Procedure),
+                    NULL
+                )
+                WHERE is_hidden = 0
+                ORDER BY column_ordinal";
 
-            cmd.CommandType = CommandType.StoredProcedure;
+            using var cmd = new SqlCommand(sql, connection);
 
-            cmd.Parameters.AddWithValue(
-                "@tsql",
-                $"EXEC dbo.{procedureName}"
-            );
+            cmd.Parameters.AddWithValue("@Procedure", procedureName);
 
             using var reader = await cmd.ExecuteReaderAsync();
 
             while (await reader.ReadAsync())
             {
-                // Skip hidden columns
-                if (!reader.IsDBNull(reader.GetOrdinal("is_hidden")) &&
-                    reader.GetBoolean(reader.GetOrdinal("is_hidden")))
-                {
-                    continue;
-                }
-
-                if (reader.IsDBNull(reader.GetOrdinal("name")))
-                    continue;
-
                 columns.Add(new ResultColumnMetadata
                 {
-                    Name = reader["name"].ToString()!,
-                    SqlType = reader["system_type_name"].ToString()!.Split('(')[0],
-                    IsNullable = Convert.ToBoolean(reader["is_nullable"])
+                    Name = reader.GetString(0),
+                    SqlType = reader.GetString(1).Split('(')[0],
+                    IsNullable = reader.GetBoolean(2)
                 });
             }
 
             return columns;
         }
         #endregion 
+
         private SqlConnection CreateConnection()
         {
             return new SqlConnection(_connectionString);

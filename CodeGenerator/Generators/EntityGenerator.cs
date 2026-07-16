@@ -17,6 +17,8 @@ public class EntityGenerator : BaseGenerator
 
     public async Task GenerateAsync(List<TableMetadata> tables, string outputFolder)
     {
+        Console.WriteLine("--------Entity generation--------\n");
+
         Directory.CreateDirectory(outputFolder);
 
         var expectedFiles = tables
@@ -32,8 +34,6 @@ public class EntityGenerator : BaseGenerator
         {
             throw new Exception(template.Messages.ToString());
         }
-
-        Console.WriteLine("--------Entity generation--------\n");
 
         foreach (var table in tables)
         {
@@ -57,7 +57,7 @@ public class EntityGenerator : BaseGenerator
 
             await WriteFileAsync(filePath, result);
         }
-        Console.WriteLine("\n--------Entity generation--------\n");
 
+        Console.WriteLine("\n--------Entity generation--------\n");
     }
 }
