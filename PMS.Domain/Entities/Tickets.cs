@@ -11,11 +11,11 @@ public partial class Tickets
 
 	public string LicenseNo { get; set; }
 
-	public string DriverName { get; set; }
+	public string? DriverName { get; set; }
 
-	public string Company { get; set; }
+	public string? Company { get; set; }
 
-	public string ModelNo { get; set; }
+	public string? ModelNo { get; set; }
 
 	public DateTime IssuedAt { get; set; }
 

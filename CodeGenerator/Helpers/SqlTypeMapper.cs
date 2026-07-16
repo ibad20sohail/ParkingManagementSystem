@@ -56,9 +56,9 @@ public static class SqlTypeMapper
         };
 
 
-        if (nullable && csharpType != "string")
+        if (nullable)
         {
-            return csharpType + "?";
+            return csharpType == "string" ? "string?" : csharpType + "?";
         }
 
 

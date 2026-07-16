@@ -9,7 +9,7 @@ public partial class ParkingSpaces
 
 	public int ParkingSpaceId { get; set; }
 
-	public string Floor { get; set; }
+	public string? Floor { get; set; }
 
 	public string Code { get; set; }
 
