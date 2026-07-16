@@ -4,7 +4,7 @@ using CodeGenerator.Helpers;
 
 namespace CodeGenerator.Generators;
 
-public class EntityGenerator
+public class EntityGenerator : BaseGenerator
 {
     private readonly string _templatePath;
 
@@ -17,32 +17,47 @@ public class EntityGenerator
 
     public async Task GenerateAsync(List<TableMetadata> tables, string outputFolder)
     {
+        Directory.CreateDirectory(outputFolder);
+
+        var expectedFiles = tables
+            .Select(t => $"{NamingHelper.ToPascalCase(t.Name)}.cs")
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        await DeleteOrphanFilesAsync(outputFolder, expectedFiles);
+
         var templateText = await File.ReadAllTextAsync(_templatePath);
 
-        var template =
-            Template.Parse(templateText);
+        var template = Template.Parse(templateText);
+        if (template.HasErrors)
+        {
+            throw new Exception(template.Messages.ToString());
+        }
+
+        Console.WriteLine("--------Entity generation--------\n");
 
         foreach (var table in tables)
         {
             var properties = table.Columns.Select(c => new
             {
-                name = c.Name,
+                name = NamingHelper.ToPascalCase(c.Name),
                 type = SqlTypeMapper.Map(c.SqlType, c.IsNullable)
             });
 
+            var entityName = NamingHelper.ToPascalCase(table.Name);
+            
             var model = new
             {
-                name = table.Name,
-                properties
+                name = entityName,
+                properties = properties
             };
 
             var result = await template.RenderAsync(model);
 
-            Directory.CreateDirectory(outputFolder);
+            var filePath = Path.Combine(outputFolder, $"{entityName}.cs");
 
-            var filePath = Path.Combine(outputFolder,$"{table.Name}.cs");
-
-            await File.WriteAllTextAsync(filePath, result);
+            await WriteFileAsync(filePath, result);
         }
+        Console.WriteLine("\n--------Entity generation--------\n");
+
     }
 }
