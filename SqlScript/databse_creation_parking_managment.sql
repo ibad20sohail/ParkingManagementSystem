@@ -1,427 +1,353 @@
-CREATE DATABASE ParkingManagementSystem;
+CREATE DATABASE parking_management_system;
 GO
-USE ParkingManagementSystem;
+USE parking_management_system;
 GO
 --TABLES START--
 GO
-CREATE TABLE Users
+CREATE TABLE users
 (
-	Id INT PRIMARY KEY IDENTITY(1,1),
-	RoleId INT NOT NULL,
-	UserName VARCHAR(30) NOT NULL UNIQUE,
-	PasswordHash VARBINARY(64) NOT NULL,
-	IsActive BIT DEFAULT 1
+	user_id INT PRIMARY KEY IDENTITY(1,1),
+	role_id INT NOT NULL,
+	user_name VARCHAR(30) NOT NULL UNIQUE,
+	password_hash VARBINARY(64) NOT NULL,
+	is_active BIT DEFAULT 1
 );
 GO
-CREATE TABLE Roles
+CREATE TABLE roles
 (
-	Id INT PRIMARY KEY IDENTITY(1,1),
-	Name VARCHAR(20) NOT NULL UNIQUE
+	role_id INT PRIMARY KEY IDENTITY(1,1),
+	name VARCHAR(20) NOT NULL UNIQUE
 );
 GO
-CREATE TABLE Tickets
+CREATE TABLE tickets
 (
-	Id INT PRIMARY KEY IDENTITY(1,1),
-	LicenseNo VARCHAR(30) NOT NULL,
-	DriverName VARCHAR(30) NULL,
-	Company VARCHAR(20) NULL,
-	Model VARCHAR(30) NULL,
-	Issued_At DATETIME2 NOT NULL DEFAULT(GETUTCDATE()),
-	Expires_At DATETIME2 NULL,
-	Is_Used BIT DEFAULT 0,
+	ticket_id INT PRIMARY KEY IDENTITY(1,1),
+	license_no VARCHAR(30) NOT NULL,
+	driver_name VARCHAR(30) NULL,
+	company VARCHAR(20) NULL,
+	model_no VARCHAR(30) NULL,
+	issued_at DATETIME2 NOT NULL DEFAULT(GETUTCDATE()),
+	expires_at DATETIME2 NULL,
+	is_used BIT DEFAULT 0,
 
-	CategoryId INT NOT NULL,
-	ParkingSpaceId INT NULL,
-	UserId INT NOT NULL
+	category_id INT NOT NULL,
+	parking_space_Id INT NULL,
+	user_id INT NOT NULL
 );
 GO
-CREATE TABLE Categories
+CREATE TABLE categories
 (
-	Id INT PRIMARY KEY IDENTITY(1,1),
-	Name VARCHAR(30) NOT NULL UNIQUE
+	category_id INT PRIMARY KEY IDENTITY(1,1),
+	name VARCHAR(30) NOT NULL UNIQUE
 );
 GO
-CREATE TABLE ParkingSpaces
+CREATE TABLE parking_spaces
 (
-	Id INT PRIMARY KEY IDENTITY(1,1),
-	Floor VARCHAR(20) NULL,
-	Code VARCHAR(10) NOT NULL UNIQUE,
-	StatusId INT NOT NULL
+	parking_space_id INT PRIMARY KEY IDENTITY(1,1),
+	floor VARCHAR(20) NULL,
+	code VARCHAR(10) NOT NULL UNIQUE,
+	parking_space_status_id INT NOT NULL
 );
 GO
-CREATE TABLE ParkingSpaceStatuses
+CREATE TABLE parking_space_statuses
 (
-	Id INT PRIMARY KEY IDENTITY(1,1),
-	Name VARCHAR(20) NOT NULL UNIQUE
+	parking_space_status_id INT PRIMARY KEY IDENTITY(1,1),
+	name VARCHAR(20) NOT NULL UNIQUE
 );
 GO
-CREATE TABLE Billings
+CREATE TABLE billings
 (
-	Id INT PRIMARY KEY IDENTITY(1,1),
-	TicketId INT NOT NULL,
-	PaymentMethodId INT NOT NUll,
-	Amount DECIMAL(10,2) NULL,
-	CreatedAt DATETIME2 NOT NULL DEFAULT(GETUTCDATE())
+	billing_id INT PRIMARY KEY IDENTITY(1,1),
+	ticket_id INT NOT NULL,
+	payment_method_id INT NOT NUll,
+	amount DECIMAL(10,2) NULL,
+	created_at DATETIME2 NOT NULL DEFAULT(GETUTCDATE())
 );
 GO
-CREATE TABLE PaymentMethods
+CREATE TABLE payment_methods
 (
-	Id INT PRIMARY KEY IDENTITY(1,1),
-	PaymentType VARCHAR(30) NOT NULL UNIQUE,
+	payment_method_id INT PRIMARY KEY IDENTITY(1,1),
+	payment_type VARCHAR(30) NOT NULL UNIQUE,
 );
 --TABLES END--
 
 --FOREIGN KEY START--
 GO
-ALTER TABLE Users ADD CONSTRAINT FK_Users_Roles FOREIGN KEY (RoleId) REFERENCES Roles(Id) ON DELETE NO ACTION;
+ALTER TABLE users ADD CONSTRAINT FK_users_roles FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE NO ACTION;
 GO
-ALTER TABLE Tickets ADD CONSTRAINT FK_Tickets_Categories FOREIGN KEY (CategoryId) REFERENCES Categories(Id) ON DELETE NO ACTION;
+ALTER TABLE tickets ADD CONSTRAINT FK_tickets_categories FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE NO ACTION;
 GO
-ALTER TABLE Tickets ADD CONSTRAINT FK_Tickets_ParkingSpaces FOREIGN KEY (ParkingSpaceId) REFERENCES ParkingSpaces(Id) ON DELETE SET NULL;
+ALTER TABLE tickets ADD CONSTRAINT FK_tickets_parking_spaces FOREIGN KEY (parking_space_id) REFERENCES parking_spaces(parking_space_id) ON DELETE SET NULL;
 GO
-ALTER TABLE Tickets ADD CONSTRAINT FK_Tickets_Users FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE NO ACTION;
+ALTER TABLE tickets ADD CONSTRAINT FK_tickets_users FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE NO ACTION;
 GO
-ALTER TABLE ParkingSpaces ADD CONSTRAINT FK_ParkingSpaces_ParkingSpaceStatuses FOREIGN KEY (StatusId) REFERENCES ParkingSpaceStatuses(Id) ON DELETE NO ACTION;
+ALTER TABLE parking_spaces ADD CONSTRAINT FK_parking_spaces_parking_space_statuses FOREIGN KEY (parking_space_status_id) REFERENCES parking_space_statuses(parking_space_status_Id) ON DELETE NO ACTION;
 GO
-ALTER TABLE Billings ADD CONSTRAINT FK_Billings_Tickets FOREIGN KEY (TicketId) REFERENCES Tickets(Id) ON DELETE NO ACTION;
+ALTER TABLE billings ADD CONSTRAINT FK_billings_tickets FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id) ON DELETE NO ACTION;
 GO
-ALTER TABLE Billings ADD CONSTRAINT FK_Billings_PaymentMethods FOREIGN KEY (PaymentMethodId) REFERENCES PaymentMethods(Id) ON DELETE NO ACTION;
+ALTER TABLE billings ADD CONSTRAINT FK_billings_payment_methods FOREIGN KEY (payment_method_id) REFERENCES payment_methods(payment_method_id) ON DELETE NO ACTION;
 --FOREIGN KEY END--
 
 --SP START--
 GO
-CREATE OR ALTER PROCEDURE AddUser @UserName VARCHAR(30), @Password VARCHAR(30)
+CREATE OR ALTER PROCEDURE usp_add_user
+@user_name VARCHAR(30), @password VARCHAR(30)
 AS
 BEGIN
 	SET NOCOUNT ON;
-	BEGIN TRY
-		IF NULLIF(@UserName, '') IS NULL OR NULLIF(@Password, '') IS NULL
-		BEGIN
-			RAISERROR('Username and password is requird.',16, 1);
-		END
-		INSERT INTO Users (UserName, PasswordHash) 
-		VALUES (@UserName, HASHBYTES('SHA2_512', @Password));
-		SELECT 'User has been added successfully.' AS Message;
-		RETURN;
-	END TRY
-	BEGIN CATCH
-		SELECT
-            ERROR_NUMBER() AS ErrorNumber,
-            ERROR_MESSAGE() AS ErrorMessage;
-	END CATCH
+	IF NULLIF(TRIM(@user_name), '') IS NULL OR NULLIF(TRIM(@password), '') IS NULL
+	BEGIN
+		;THROW 50001, 'Username and password is requird.', 1;
+	END
+	INSERT INTO Users (user_name, password_hash) 
+	VALUES (@user_name, HASHBYTES('SHA2_512', @password));
+	SELECT 'User has been added successfully.' AS Message;
+	RETURN;
 END
 GO
-CREATE OR ALTER PROCEDURE EditUser 
-@Id INT, @UserName VARCHAR(30) = NULL, @OldPassword VARCHAR(30) = NULL, @NewPassword VARCHAR(30) = NULL, @ConfirmNewPassword VARCHAR(30) = NULL
+CREATE OR ALTER PROCEDURE usp_edit_user
+@user_id INT, @user_name VARCHAR(30) = NULL, @old_password VARCHAR(30) = NULL, @new_password VARCHAR(30) = NULL, @confirm_new_password VARCHAR(30) = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
-	BEGIN TRY
-		IF NOT EXISTS (SELECT 1 FROM Users WHERE Id = @Id)
+	IF NOT EXISTS (SELECT 1 FROM users WHERE user_id = @user_id)
+	BEGIN
+		;THROW 50001, 'User not found', 1;
+	END
+	IF NULLIF(@user_name, '') IS NOT NULL
+	BEGIN
+		IF EXISTS(SELECT 1 FROM users WHERE user_name = @user_name AND user_id <> @user_id)
 		BEGIN
-			RAISERROR('User not found.', 16, 1);
+			;THROW 50001, 'Use name already exists.', 2;
 		END
-		IF NULLIF(@UserName, '') IS NOT NULL
+		UPDATE users SET user_name = @user_name WHERE user_id = @user_id;
+	END
+	IF NULLIF(@old_password,'') IS NOT NULL AND NULLIF(@new_password,'') IS NOT NULL AND NULLIF(@confirm_new_password,'') IS NOT NULL
+	BEGIN
+		IF @new_password <> @confirm_new_password
 		BEGIN
-			IF EXISTS(SELECT 1 FROM Users WHERE UserName = @UserName AND Id <> @Id)
-			BEGIN
-				RAISERROR('Username already exists.', 16, 2);
-			END
-			ELSE
-			UPDATE Users SET UserName = @UserName WHERE Id = @Id;
+			;THROW 50001, 'Confirm password does not match with new password.', 3;
 		END
-		IF NULLIF(@OldPassword,'') IS NOT NULL AND NULLIF(@NewPassword,'') IS NOT NULL AND NULLIF(@ConfirmNewPassword,'') IS NOT NULL
+		IF NOT EXISTS(SELECT 1 FROM users WHERE user_id = @user_id AND password_hash = HASHBYTES('SHA2_512', @old_password))
 		BEGIN
-			IF @NewPassword <> @ConfirmNewPassword
-			BEGIN
-				RAISERROR('Confirm password does not match with new password.', 16, 1);
-			END
-			IF NOT EXISTS(SELECT 1 FROM Users WHERE Id = @Id AND PasswordHash = HASHBYTES('SHA2_512', @OldPassword))
-			BEGIN
-				RAISERROR('Old password is incorrect.', 16, 1)
-			END
-			UPDATE Users SET PasswordHash = HASHBYTES('SHA2_512', @NewPassword) WHERE Id = @Id;
+			;THROW 50001, 'Old password is incorrect.', 4;
 		END
-		SELECT 'User has been updated successfully.' AS Message;
-		RETURN;
-	END TRY
-	BEGIN CATCH
-		SELECT
-            ERROR_NUMBER() AS ErrorNumber,
-            ERROR_MESSAGE() AS ErrorMessage;
-	END CATCH
+		UPDATE users SET password_hash = HASHBYTES('SHA2_512', @new_password) WHERE user_id = @user_id;
+	END
+	SELECT 'User has been updated successfully.' AS Message;
+	RETURN;
 END
 GO
-CREATE OR ALTER PROCEDURE DeleteUser @Id INT
+CREATE OR ALTER PROCEDURE usp_delete_user 
+@user_id INT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	BEGIN TRY
-		IF NOT EXISTS (SELECT 1 FROM Users WHERE Id = @Id)
-		BEGIN
-			RAISERROR('User not found.',16,1);
-		END
-		DELETE FROM Users WHERE Id = @Id;
-		SELECT 'User has been deleted successfully.' AS Message;
-		RETURN;
-	END TRY
-	BEGIN CATCH
-		SELECT
-            ERROR_NUMBER() AS ErrorNumber,
-            ERROR_MESSAGE() AS ErrorMessage;
-	END CATCH
+	IF NOT EXISTS (SELECT 1 FROM users WHERE user_id = @user_id)
+	BEGIN
+		;THROW 50001, 'User not found', 1;
+	END
+	DELETE FROM users WHERE user_id = @user_id;
+	SELECT 'User has been deleted successfully.' AS Message;
+	RETURN;
 END
 GO
-CREATE OR ALTER PROCEDURE AddRole @Name VARCHAR(20)
+CREATE OR ALTER PROCEDURE usp_add_role 
+@name VARCHAR(20)
 AS
 BEGIN
 	SET NOCOUNT ON;
-	BEGIN TRY
-		IF EXISTS(SELECT 1 FROM Roles WHERE Name = @Name)
-		BEGIN
-			RAISERROR('This Role is already in roles.',16,1);
-		END
-		INSERT INTO Roles(Name) VALUES (@Name);
-		SELECT 'Role has been added successfully.' AS Message;
-		RETURN;
-	END TRY
-	BEGIN CATCH
-		SELECT
-			ERROR_NUMBER() AS ErrorNumber,
-			ERROR_MESSAGE() AS ErrorMessage
-	END CATCH
+	IF EXISTS(SELECT 1 FROM roles WHERE Name = @name)
+	BEGIN
+		;THROW 50001, 'This Role is already in roles.', 1;
+	END
+	INSERT INTO roles(name) VALUES (@name);
+	SELECT 'Role has been added successfully.' AS Message;
+	RETURN;
 END
 GO
-CREATE OR ALTER PROCEDURE EditRole @Id INT, @Name VARCHAR(20)
+CREATE OR ALTER PROCEDURE usp_edit_role 
+@role_id INT, @name VARCHAR(20)
 AS
 BEGIN
 	SET NOCOUNT ON;
-	BEGIN TRY
-		IF EXISTS(SELECT 1 FROM Roles WHERE Name = @Name AND Id <> @Id)
-		BEGIN
-			RAISERROR('This role name is already in roles.',16,1);
-		END
-		UPDATE Roles SET Name = @Name WHERE Id = @Id;
-		SELECT 'Role has been updated successfully' AS Message;
-		RETURN;
-	END TRY
-	BEGIN CATCH
-		SELECT
-			ERROR_NUMBER() AS ErrorNumber,
-			ERROR_MESSAGE() AS ErrorMessage
-	END CATCH
+	IF EXISTS(SELECT 1 FROM roles WHERE name = @name AND role_id <> @role_id)
+	BEGIN
+		;THROW 50001, 'This role name is already in roles.', 1;
+	END
+	UPDATE roles SET Name = @name WHERE role_id = @role_id;
+	SELECT 'Role has been updated successfully' AS Message;
+	RETURN;
 END
 GO
-CREATE OR ALTER PROCEDURE DeleteRole @Id INT
+CREATE OR ALTER PROCEDURE usp_delete_role 
+@role_id INT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	BEGIN TRY
-		IF NOT EXISTS(SELECT 1 FROM Roles WHERE Id = @Id)
-		BEGIN
-			RAISERROR('Role not found.',16,1);
-		END
-		DELETE FROM Roles WHERE Id = @Id;
-		SELECT 'Role has been deleted successfully.' AS Message;
-		RETURN;
-	END TRY
-	BEGIN CATCH
-		SELECT
-			ERROR_NUMBER() AS ErrorNumber,
-			ERROR_MESSAGE() AS ErrorMessage
-	END CATCH
+	IF NOT EXISTS(SELECT 1 FROM roles WHERE role_id = @role_id)
+	BEGIN
+		;THROW 50001, 'Role not found.', 1;
+	END
+	DELETE FROM roles WHERE role_id = @role_id;
+	SELECT 'Role has been deleted successfully.' AS Message;
+	RETURN;
 END
 GO
-CREATE OR ALTER PROCEDURE AddCategory @Name VARCHAR(30)
+CREATE OR ALTER PROCEDURE usp_add_category 
+@name VARCHAR(30)
 AS
 BEGIN
 	SET NOCOUNT ON;
-	BEGIN TRY
-		IF EXISTS(SELECT 1 FROM Categories WHERE Name = @Name)
-		BEGIN
-			RAISERROR('This category is already in category.',16,1);
-		END
-		INSERT INTO Categories(Name) VALUES (@Name);
-		SELECT 'Category has been added successfully.' AS Message;
-		RETURN;
-	END TRY
-	BEGIN CATCH
-		SELECT
-			ERROR_NUMBER() AS ErrorNumber,
-			ERROR_MESSAGE() AS ErrorMessage
-	END CATCH
+	IF EXISTS(SELECT 1 FROM categories WHERE name = @name)
+	BEGIN
+		;THROW 50001, 'This category is already in category.', 1;
+	END
+	INSERT INTO Categories(name) VALUES (@name);
+	SELECT 'Category has been added successfully.' AS Message;
+	RETURN;
 END
 GO
-CREATE OR ALTER PROCEDURE EditCategory @Id INT, @Name VARCHAR(30) = NULL
+CREATE OR ALTER PROCEDURE usp_edit_category 
+@category_id INT, @name VARCHAR(30) = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
-	BEGIN TRY
-		IF EXISTS(SELECT 1 FROM Categories WHERE Name = @Name AND Id <> @Id)
-		BEGIN
-			RAISERROR('This category name is already in category.',16,1);
-		END
-		UPDATE Categories SET Name = @Name WHERE Id = @Id;
-		SELECT 'Category has been updated successfully' AS Message;
-		RETURN;
-	END TRY
-	BEGIN CATCH
-		SELECT
-			ERROR_NUMBER() AS ErrorNumber,
-			ERROR_MESSAGE() AS ErrorMessage
-	END CATCH
+	IF EXISTS(SELECT 1 FROM categories WHERE Name = @name AND category_id <> @category_id)
+	BEGIN
+		;THROW 50001, 'This category is already in category.', 1;
+	END
+	UPDATE categories SET Name = @name WHERE category_id = @category_id;
+	SELECT 'Category has been updated successfully' AS Message;
+	RETURN;
 END
 GO
-CREATE OR ALTER PROCEDURE DeleteCategory @Id INT
+CREATE OR ALTER PROCEDURE usp_delete_category 
+@category_id INT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	BEGIN TRY
-		IF NOT EXISTS(SELECT 1 FROM Categories WHERE Id = @Id)
-		BEGIN
-			RAISERROR('Category not found.',16,1);
-		END
-		DELETE FROM Categories WHERE Id = @Id;
-		SELECT 'Category has been deleted successfully.' AS Message;
-		RETURN;
-	END TRY
-	BEGIN CATCH
-		SELECT
-			ERROR_NUMBER() AS ErrorNumber,
-			ERROR_MESSAGE() AS ErrorMessage
-	END CATCH
+	IF NOT EXISTS(SELECT 1 FROM categories WHERE category_id = @category_id)
+	BEGIN
+		;THROW 50001, 'Category not found.', 1;
+	END
+	DELETE FROM categories WHERE category_id = @category_id;
+	SELECT 'Category has been deleted successfully.' AS Message;
+	RETURN;
 END
 GO
-CREATE OR ALTER PROCEDURE AddParkingSpace @Floor VARCHAR(20), @Code VARCHAR(10), @StatusId INT
+CREATE OR ALTER PROCEDURE usp_add_parking_space 
+@floor VARCHAR(20), @code VARCHAR(10), @parking_space_status_id INT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	BEGIN TRY
-		IF ISNULL(@Code, '') IS NULL AND ISNULL(@StatusId, '') IS NULL
-		BEGIN
-			RAISERROR('Code and status is required', 16, 1);
-		END
-		IF EXISTS (SELECT 1 FROM ParkingSpaces WHERE Code = @Code)
-		BEGIN
-			RAISERROR('Code is already exists.',16,1);
-		END
-		IF NOT EXISTS (SELECT 1 FROM ParkingSpaceStatuses WHERE Id = @StatusId)
-		BEGIN
-			RAISERROR('Not a valid status.', 16, 1);
-		END
-		INSERT INTO ParkingSpaces(Floor, Code, StatusId) VALUES (@Floor, @Code, @StatusId);
-		SELECT 'Parking space has been added successfully.' AS Message;
-		RETURN;
-	END TRY
-	BEGIN CATCH
-		SELECT
-			ERROR_NUMBER() AS ErrorNumber,
-			ERROR_MESSAGE() AS ErrorMessage
-	END CATCH
+	IF ISNULL(@code, '') IS NULL AND ISNULL(@parking_space_status_id, '') IS NULL
+	BEGIN
+		;THROW 50001, 'Code and status is required', 1;
+	END
+	IF EXISTS (SELECT 1 FROM parking_spaces WHERE code = @code)
+	BEGIN
+		;THROW 50001, 'Code is already exists.', 2;
+	END
+	IF NOT EXISTS (SELECT 1 FROM parking_space_statuses WHERE parking_space_status_id = @parking_space_status_id)
+	BEGIN
+		;THROW 50001, 'Not a valid status.', 3;
+	END
+	INSERT INTO parking_spaces(floor, code, parking_space_status_id) VALUES (@floor, @code, @parking_space_status_id);
+	SELECT 'Parking space has been added successfully.' AS Message;
+	RETURN;
 END
 GO
-CREATE OR ALTER PROCEDURE EditParkingSpace @Id INT, @Floor VARCHAR(20), @Code VARCHAR(10), @StatusId INT
+CREATE OR ALTER PROCEDURE usp_edit_parking_space 
+@parking_space_id INT, @floor VARCHAR(20), @code VARCHAR(10), @parking_space_status_id INT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	BEGIN TRY
-		IF ISNULL(@Code, '') IS NULL AND ISNULL(@StatusId, '') IS NULL
-		BEGIN
-			RAISERROR('Code and status is required', 16, 1);
-		END
-		IF EXISTS (SELECT 1 FROM ParkingSpaces WHERE Code = @Code AND Id <> @Id)
-		BEGIN
-			RAISERROR('Code is already exists.',16,1);
-		END
-		IF NOT EXISTS (SELECT 1 FROM ParkingSpaceStatuses WHERE Id = @StatusId)
-		BEGIN
-			RAISERROR('Not a valid status.', 16, 1);
-		END
-		UPDATE ParkingSpaces SET Floor = @Floor, Code = @Code, StatusId = @StatusId;
-		SELECT 'Parking space has been updated successfully.' AS Message;
-		RETURN;
-	END TRY
-	BEGIN CATCH
-		SELECT
-			ERROR_NUMBER() AS ErrorNumber,
-			ERROR_MESSAGE() AS ErrorMessage
-	END CATCH
+	IF ISNULL(@code, '') IS NULL AND ISNULL(@parking_space_status_id, '') IS NULL
+	BEGIN
+		;THROW 50001, 'Code and status is required', 1;
+	END
+	IF EXISTS (SELECT 1 FROM parking_spaces WHERE code = @code AND parking_space_id <> @parking_space_id)
+	BEGIN
+		;THROW 50001, 'Code is already exists.', 2;
+	END
+	IF NOT EXISTS (SELECT 1 FROM parking_space_statuses WHERE parking_space_status_id = @parking_space_status_id)
+	BEGIN
+		;THROW 50001, 'Not a valid status.', 3;
+	END
+	UPDATE parking_spaces SET floor = @floor, code = @code, parking_space_status_id = @parking_space_status_id WHERE parking_space_id = @parking_space_id;
+	SELECT 'Parking space has been updated successfully.' AS Message;
+	RETURN;
 END
 GO
-CREATE OR ALTER PROCEDURE DeleteParkingSpace @Id INT
+CREATE OR ALTER PROCEDURE usp_delete_parking_space 
+@parking_space_id INT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	BEGIN TRY
-		IF NOT EXISTS (SELECT 1 FROM ParkingSpaces WHERE Id = @Id)
-		BEGIN
-			RAISERROR('Parking space not found', 16,1);
-		END
-		DELETE FROM ParkingSpaces WHERE Id = @Id;
-		SELECT 'Parking space has been deleted' AS Message;
-		RETURN;
-	END TRY
-	BEGIN CATCH
-		SELECT
-			ERROR_NUMBER() AS ErrorNumber,
-			ERROR_MESSAGE() AS ErrorMessage
-	END CATCH
+	IF NOT EXISTS (SELECT 1 FROM parking_spaces WHERE parking_space_id = @parking_space_id)
+	BEGIN
+		;THROW 50001, 'Parking space not found', 1;
+	END
+	DELETE FROM parking_spaces WHERE parking_space_id = @parking_space_id;
+	SELECT 'Parking space has been deleted' AS Message;
+	RETURN;
 END
 --SP END--
 
 --FUNCTION START--
-GO
-CREATE OR ALTER FUNCTION FN_GetUserById(@Id INT, @IsActive BIT = 1)
-RETURNS TABLE
-AS
-RETURN
-(
-	SELECT * FROM Users WHERE Id = @Id AND IsActive = @IsActive
-);
-GO
-CREATE OR ALTER FUNCTION FN_GetUsers(@IsActive BIT = 1)
-RETURNS TABLE
-AS
-RETURN
-(
-	SELECT * FROM Users WHERE IsActive = @IsActive
-);
-GO
-CREATE OR ALTER FUNCTION FN_GetRoleById(@Id INT)
-RETURNS TABLE
-AS
-RETURN
-(
-	SELECT * FROM Roles WHERE Id = @Id
-);
-GO
-CREATE OR ALTER FUNCTION FN_GetRoles()
-RETURNS TABLE
-AS
-RETURN
-(
-	SELECT * FROM Roles
-);
-GO
-CREATE OR ALTER FUNCTION FN_GetCategoryById(@Id INT)
-RETURNS TABLE
-AS
-RETURN
-(
-	SELECT * FROM Categories WHERE Id = @Id
-);
-GO
-CREATE OR ALTER FUNCTION FN_GetCategories()
-RETURNS TABLE
-AS
-RETURN
-(
-	SELECT * FROM Categories
-);
+--GO
+--CREATE OR ALTER FUNCTION FN_GetUserById(@Id INT, @IsActive BIT = 1)
+--RETURNS TABLE
+--AS
+--RETURN
+--(
+--	SELECT * FROM Users WHERE Id = @Id AND IsActive = @IsActive
+--);
+--GO
+--CREATE OR ALTER FUNCTION FN_GetUsers(@IsActive BIT = 1)
+--RETURNS TABLE
+--AS
+--RETURN
+--(
+--	SELECT * FROM Users WHERE IsActive = @IsActive
+--);
+--GO
+--CREATE OR ALTER FUNCTION FN_GetRoleById(@Id INT)
+--RETURNS TABLE
+--AS
+--RETURN
+--(
+--	SELECT * FROM Roles WHERE Id = @Id
+--);
+--GO
+--CREATE OR ALTER FUNCTION FN_GetRoles()
+--RETURNS TABLE
+--AS
+--RETURN
+--(
+--	SELECT * FROM Roles
+--);
+--GO
+--CREATE OR ALTER FUNCTION FN_GetCategoryById(@Id INT)
+--RETURNS TABLE
+--AS
+--RETURN
+--(
+--	SELECT * FROM Categories WHERE Id = @Id
+--);
+--GO
+--CREATE OR ALTER FUNCTION FN_GetCategories()
+--RETURNS TABLE
+--AS
+--RETURN
+--(
+--	SELECT * FROM Categories
+--);
 
 --FUNCTION END--
 --INSERT START--
 GO
-EXEC AddRole 'admin';
-EXEC AddRole 'operator';
+EXEC usp_add_role 'admin';
+EXEC usp_add_role 'operator';
 --INSERT END--
