@@ -26,3 +26,14 @@ var operationResponsePath = Path.GetFullPath(Cons.OperationResponseTemplatePath)
 var responseGenerator = new ResponseGenerator(requestPath, operationResponsePath);
 var outputForResponse = Path.Combine(solutionRoot, Cons.ResponseGenerationPath);
 await responseGenerator.GenerateAsync(procedures, outputForResponse);
+
+var repoInterfacePath = Path.GetFullPath(Cons.RepositoryInterfaceTemplatePath);
+var repoInterfaceGenerator = new RepositoryInterfaceGenerator(repoInterfacePath);
+var outputForRepoInterface = Path.Combine(solutionRoot, Cons.RepositoryInterfaceGenerationPath);
+await repoInterfaceGenerator.GenerateAsync(procedures, outputForRepoInterface);
+
+var repoImplementationPath = Path.GetFullPath(Cons.RepositoryImplementationTemplatePath);
+var repoImplementationGenerator = new RepositoryImplementationGenerator(repoImplementationPath);
+var outputForRepoImplementation = Path.Combine(solutionRoot, Cons.RepositoryImplementationGenerationPath);
+await repoImplementationGenerator.GenerateAsync(procedures, outputForRepoImplementation);
+

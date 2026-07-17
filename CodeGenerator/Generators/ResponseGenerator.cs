@@ -20,14 +20,14 @@ public class ResponseGenerator : BaseGenerator
 
     public async Task GenerateAsync(List<ProcedureMetadata> procedures, string outputFolder)
     {
-        Console.WriteLine("--------Response Model generation--------\n");
+        Console.WriteLine("--------Response Model--------\n");
 
         Directory.CreateDirectory(outputFolder);
 
         var expectedFiles = procedures
            .Where(p => !p.IsOperation)
            .Where(p => p.ResultColumns.Count > 0)
-           .Select(p => $"{p.Action}{p.Entity}{Cons.ResponseModel}.cs")
+           .Select(p => $"{p.Action}{p.Entity}{Cons.Response}.cs")
            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         await DeleteOrphanFilesAsync(outputFolder, expectedFiles);
@@ -56,7 +56,7 @@ public class ResponseGenerator : BaseGenerator
 
             var model = new
             {
-                Name = $"{procedure.Action}{procedure.Entity}{Cons.ResponseModel}",
+                Name = $"{procedure.Action}{procedure.Entity}{Cons.Response}",
                 Properties = properties
             };
 
@@ -66,29 +66,23 @@ public class ResponseGenerator : BaseGenerator
 
             await WriteFileAsync(filePath, result);
         }
+        Console.WriteLine("\n\n");
 
-        Console.WriteLine("\n--------Response Model generation--------\n");
     }
 
 
     private async Task GenerateOperationResponseAsync(string outputFolder)
     {
-        var filePath = Path.Combine(outputFolder, "OperationResponse.cs");
+        var filePath = Path.Combine(outputFolder, $"{Cons.Operation}{Cons.Response}.cs");
 
         if (File.Exists(filePath))
         {
-            Console.WriteLine("Skipped: OperationResponse.cs");
+            Console.WriteLine($"Skipped: {Cons.Operation}{Cons.Response}.cs");
             return;
         }
 
         var template = await File.ReadAllTextAsync(_operationTemplatePath);
 
         await WriteFileAsync(filePath, template);
-    }
-    private bool IsOperationProcedure(ProcedureMetadata procedure)
-    {
-        return procedure.Action == Cons.Add
-            || procedure.Action == Cons.Edit
-            || procedure.Action == Cons.Delete;
     }
 }

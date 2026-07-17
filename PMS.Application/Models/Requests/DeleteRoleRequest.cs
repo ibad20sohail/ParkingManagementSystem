@@ -4,7 +4,7 @@
 
 namespace PMS.Application.Models.Requests;
 
-public class DeleteRoleRequstModel
+public class DeleteRoleRequest
 {
 
     public int RoleId { get; set; }

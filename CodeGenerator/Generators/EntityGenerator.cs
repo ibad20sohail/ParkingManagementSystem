@@ -17,7 +17,7 @@ public class EntityGenerator : BaseGenerator
 
     public async Task GenerateAsync(List<TableMetadata> tables, string outputFolder)
     {
-        Console.WriteLine("--------Entity generation--------\n");
+        Console.WriteLine("--------Entity--------\n");
 
         Directory.CreateDirectory(outputFolder);
 
@@ -58,6 +58,6 @@ public class EntityGenerator : BaseGenerator
             await WriteFileAsync(filePath, result);
         }
 
-        Console.WriteLine("\n--------Entity generation--------\n");
+        Console.WriteLine("\n\n");
     }
 }

@@ -4,10 +4,8 @@
 
 namespace PMS.Application.Models.Requests;
 
-public class EditRoleRequstModel
+public class AddCategoryRequest
 {
-
-    public int RoleId { get; set; }
 
     public string Name { get; set; }
 

@@ -4,8 +4,10 @@
 
 namespace PMS.Application.Models.Requests;
 
-public class AddParkingSpaceRequstModel
+public class EditParkingSpaceRequest
 {
+
+    public int ParkingSpaceId { get; set; }
 
     public string Floor { get; set; }
 

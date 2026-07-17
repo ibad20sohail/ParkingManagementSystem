@@ -4,9 +4,9 @@
 
 namespace PMS.Application.Models.Requests;
 
-public class DeleteParkingSpaceRequstModel
+public class AddRoleRequest
 {
 
-    public int ParkingSpaceId { get; set; }
+    public string Name { get; set; }
 
 }

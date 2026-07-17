@@ -16,13 +16,13 @@ public class RequestGenerator  : BaseGenerator
 
     public async Task GenerateAsync(List<ProcedureMetadata> procedures, string outputFolder)
     {
-        Console.WriteLine("--------Request Model generation--------\n");
+        Console.WriteLine("--------Request Model--------\n");
 
         Directory.CreateDirectory(outputFolder);
 
         var expectedFiles = procedures
             .Where(p => p.Parameters.Count > 0)
-            .Select(p => $"{p.Action}{p.Entity}{Cons.RequestModel}.cs")
+            .Select(p => $"{p.Action}{p.Entity}{Cons.Request}.cs")
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         await DeleteOrphanFilesAsync(outputFolder, expectedFiles);
@@ -51,7 +51,7 @@ public class RequestGenerator  : BaseGenerator
 
             var model = new
             {
-                Name = $"{procedure.Action}{procedure.Entity}{Cons.RequestModel}",
+                Name = $"{procedure.Action}{procedure.Entity}{Cons.Request}",
                 Properties = properties
             };
 
@@ -61,6 +61,6 @@ public class RequestGenerator  : BaseGenerator
 
             await WriteFileAsync(filePath, result);
         }
-        Console.WriteLine("\n--------Request Model generation--------\n");
+        Console.WriteLine("\n\n");
     }
 }

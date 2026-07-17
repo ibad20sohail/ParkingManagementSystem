@@ -4,15 +4,9 @@
 
 namespace PMS.Application.Models.Requests;
 
-public class EditParkingSpaceRequstModel
+public class DeleteParkingSpaceRequest
 {
 
     public int ParkingSpaceId { get; set; }
-
-    public string Floor { get; set; }
-
-    public string Code { get; set; }
-
-    public int ParkingSpaceStatusId { get; set; }
 
 }

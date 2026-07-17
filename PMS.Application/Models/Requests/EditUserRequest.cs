@@ -4,7 +4,7 @@
 
 namespace PMS.Application.Models.Requests;
 
-public class EditUserRequstModel
+public class EditUserRequest
 {
 
     public int UserId { get; set; }

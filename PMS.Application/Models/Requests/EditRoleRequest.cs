@@ -4,9 +4,11 @@
 
 namespace PMS.Application.Models.Requests;
 
-public class DeleteCategoryRequstModel
+public class EditRoleRequest
 {
 
-    public int CategoryId { get; set; }
+    public int RoleId { get; set; }
+
+    public string Name { get; set; }
 
 }
