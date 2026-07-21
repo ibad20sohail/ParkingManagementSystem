@@ -8,52 +8,52 @@ using PMS.Application.IRepositories.Role;
 using PMS.Application.Models.Requests;
 using PMS.Application.Models.Responses;
 
-namespace PMS.Infrastructure.Repositories.Role
+namespace PMS.Infrastructure.Repositories.Role;
+
+public class RoleRepository : IRoleRepository
 {
-    public class RoleRepository : IRoleRepository
+    private readonly IDbConnection _connection;
+
+    public RoleRepository(IDbConnection connection)
     {
-        private readonly IDbConnection _connection;
-
-        public RoleRepository(IDbConnection connection)
-        {
-            _connection = connection;
-        }
-
-    
-        public async Task<OperationResponse> AddRoleAsync(AddRoleRequest request)
-        {
-            
-                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
-                    "usp_add_role",
-                    request,
-                    commandType: CommandType.StoredProcedure);
-                
-        }
-        
-
-    
-        public async Task<OperationResponse> DeleteRoleAsync(DeleteRoleRequest request)
-        {
-            
-                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
-                    "usp_delete_role",
-                    request,
-                    commandType: CommandType.StoredProcedure);
-                
-        }
-        
-
-    
-        public async Task<OperationResponse> EditRoleAsync(EditRoleRequest request)
-        {
-            
-                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
-                    "usp_edit_role",
-                    request,
-                    commandType: CommandType.StoredProcedure);
-                
-        }
-        
-
+        _connection = connection;
     }
+
+
+public async Task<OperationResponse> AddRoleAsync(AddRoleRequest request)
+{
+    
+        return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+            "usp_add_role",
+            request,
+            commandType: CommandType.StoredProcedure);
+        
 }
+
+
+
+public async Task<OperationResponse> DeleteRoleAsync(DeleteRoleRequest request)
+{
+    
+        return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+            "usp_delete_role",
+            request,
+            commandType: CommandType.StoredProcedure);
+        
+}
+
+
+
+public async Task<OperationResponse> EditRoleAsync(EditRoleRequest request)
+{
+    
+        return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+            "usp_edit_role",
+            request,
+            commandType: CommandType.StoredProcedure);
+        
+}
+
+
+}
+

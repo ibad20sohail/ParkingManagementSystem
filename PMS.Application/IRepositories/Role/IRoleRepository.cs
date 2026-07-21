@@ -5,22 +5,21 @@
 using PMS.Application.Models.Requests;
 using PMS.Application.Models.Responses;
 
-namespace PMS.Application.IRepositories.Role
+namespace PMS.Application.IRepositories.Role;
+
+public interface IRoleRepository
 {
-    public interface IRoleRepository
-    {
+    
+            
+                    Task<OperationResponse> AddRoleAsync(AddRoleRequest request);
+                
         
-                    
-                            Task<OperationResponse> AddRoleAsync(AddRoleRequest request);
-                        
+            
+                    Task<OperationResponse> DeleteRoleAsync(DeleteRoleRequest request);
                 
-                    
-                            Task<OperationResponse> DeleteRoleAsync(DeleteRoleRequest request);
-                        
+        
+            
+                    Task<OperationResponse> EditRoleAsync(EditRoleRequest request);
                 
-                    
-                            Task<OperationResponse> EditRoleAsync(EditRoleRequest request);
-                        
-                
-    }
+        
 }

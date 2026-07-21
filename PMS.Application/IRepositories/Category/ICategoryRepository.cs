@@ -5,22 +5,21 @@
 using PMS.Application.Models.Requests;
 using PMS.Application.Models.Responses;
 
-namespace PMS.Application.IRepositories.Category
+namespace PMS.Application.IRepositories.Category;
+
+public interface ICategoryRepository
 {
-    public interface ICategoryRepository
-    {
+    
+            
+                    Task<OperationResponse> AddCategoryAsync(AddCategoryRequest request);
+                
         
-                    
-                            Task<OperationResponse> AddCategoryAsync(AddCategoryRequest request);
-                        
+            
+                    Task<OperationResponse> DeleteCategoryAsync(DeleteCategoryRequest request);
                 
-                    
-                            Task<OperationResponse> DeleteCategoryAsync(DeleteCategoryRequest request);
-                        
+        
+            
+                    Task<OperationResponse> EditCategoryAsync(EditCategoryRequest request);
                 
-                    
-                            Task<OperationResponse> EditCategoryAsync(EditCategoryRequest request);
-                        
-                
-    }
+        
 }

@@ -8,52 +8,52 @@ using PMS.Application.IRepositories.ParkingSpace;
 using PMS.Application.Models.Requests;
 using PMS.Application.Models.Responses;
 
-namespace PMS.Infrastructure.Repositories.ParkingSpace
+namespace PMS.Infrastructure.Repositories.ParkingSpace;
+
+public class ParkingSpaceRepository : IParkingSpaceRepository
 {
-    public class ParkingSpaceRepository : IParkingSpaceRepository
+    private readonly IDbConnection _connection;
+
+    public ParkingSpaceRepository(IDbConnection connection)
     {
-        private readonly IDbConnection _connection;
-
-        public ParkingSpaceRepository(IDbConnection connection)
-        {
-            _connection = connection;
-        }
-
-    
-        public async Task<OperationResponse> AddParkingSpaceAsync(AddParkingSpaceRequest request)
-        {
-            
-                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
-                    "usp_add_parking_space",
-                    request,
-                    commandType: CommandType.StoredProcedure);
-                
-        }
-        
-
-    
-        public async Task<OperationResponse> DeleteParkingSpaceAsync(DeleteParkingSpaceRequest request)
-        {
-            
-                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
-                    "usp_delete_parking_space",
-                    request,
-                    commandType: CommandType.StoredProcedure);
-                
-        }
-        
-
-    
-        public async Task<OperationResponse> EditParkingSpaceAsync(EditParkingSpaceRequest request)
-        {
-            
-                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
-                    "usp_edit_parking_space",
-                    request,
-                    commandType: CommandType.StoredProcedure);
-                
-        }
-        
-
+        _connection = connection;
     }
+
+
+public async Task<OperationResponse> AddParkingSpaceAsync(AddParkingSpaceRequest request)
+{
+    
+        return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+            "usp_add_parking_space",
+            request,
+            commandType: CommandType.StoredProcedure);
+        
 }
+
+
+
+public async Task<OperationResponse> DeleteParkingSpaceAsync(DeleteParkingSpaceRequest request)
+{
+    
+        return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+            "usp_delete_parking_space",
+            request,
+            commandType: CommandType.StoredProcedure);
+        
+}
+
+
+
+public async Task<OperationResponse> EditParkingSpaceAsync(EditParkingSpaceRequest request)
+{
+    
+        return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+            "usp_edit_parking_space",
+            request,
+            commandType: CommandType.StoredProcedure);
+        
+}
+
+
+}
+

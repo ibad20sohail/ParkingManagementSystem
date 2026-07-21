@@ -4,13 +4,11 @@
 
 namespace PMS.Application.Models.Requests;
 
-public class AddUserRequest
+public class LoginUserRequest
 {
 
     public string UserName { get; set; }
 
     public string Password { get; set; }
-
-    public int RoleId { get; set; }
 
 }

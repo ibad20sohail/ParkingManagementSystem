@@ -8,52 +8,52 @@ using PMS.Application.IRepositories.Category;
 using PMS.Application.Models.Requests;
 using PMS.Application.Models.Responses;
 
-namespace PMS.Infrastructure.Repositories.Category
+namespace PMS.Infrastructure.Repositories.Category;
+
+public class CategoryRepository : ICategoryRepository
 {
-    public class CategoryRepository : ICategoryRepository
+    private readonly IDbConnection _connection;
+
+    public CategoryRepository(IDbConnection connection)
     {
-        private readonly IDbConnection _connection;
-
-        public CategoryRepository(IDbConnection connection)
-        {
-            _connection = connection;
-        }
-
-    
-        public async Task<OperationResponse> AddCategoryAsync(AddCategoryRequest request)
-        {
-            
-                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
-                    "usp_add_category",
-                    request,
-                    commandType: CommandType.StoredProcedure);
-                
-        }
-        
-
-    
-        public async Task<OperationResponse> DeleteCategoryAsync(DeleteCategoryRequest request)
-        {
-            
-                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
-                    "usp_delete_category",
-                    request,
-                    commandType: CommandType.StoredProcedure);
-                
-        }
-        
-
-    
-        public async Task<OperationResponse> EditCategoryAsync(EditCategoryRequest request)
-        {
-            
-                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
-                    "usp_edit_category",
-                    request,
-                    commandType: CommandType.StoredProcedure);
-                
-        }
-        
-
+        _connection = connection;
     }
+
+
+public async Task<OperationResponse> AddCategoryAsync(AddCategoryRequest request)
+{
+    
+        return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+            "usp_add_category",
+            request,
+            commandType: CommandType.StoredProcedure);
+        
 }
+
+
+
+public async Task<OperationResponse> DeleteCategoryAsync(DeleteCategoryRequest request)
+{
+    
+        return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+            "usp_delete_category",
+            request,
+            commandType: CommandType.StoredProcedure);
+        
+}
+
+
+
+public async Task<OperationResponse> EditCategoryAsync(EditCategoryRequest request)
+{
+    
+        return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+            "usp_edit_category",
+            request,
+            commandType: CommandType.StoredProcedure);
+        
+}
+
+
+}
+

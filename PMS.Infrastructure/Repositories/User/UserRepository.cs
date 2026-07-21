@@ -8,52 +8,64 @@ using PMS.Application.IRepositories.User;
 using PMS.Application.Models.Requests;
 using PMS.Application.Models.Responses;
 
-namespace PMS.Infrastructure.Repositories.User
+namespace PMS.Infrastructure.Repositories.User;
+
+public class UserRepository : IUserRepository
 {
-    public class UserRepository : IUserRepository
+    private readonly IDbConnection _connection;
+
+    public UserRepository(IDbConnection connection)
     {
-        private readonly IDbConnection _connection;
-
-        public UserRepository(IDbConnection connection)
-        {
-            _connection = connection;
-        }
-
-    
-        public async Task<OperationResponse> AddUserAsync(AddUserRequest request)
-        {
-            
-                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
-                    "usp_add_user",
-                    request,
-                    commandType: CommandType.StoredProcedure);
-                
-        }
-        
-
-    
-        public async Task<OperationResponse> DeleteUserAsync(DeleteUserRequest request)
-        {
-            
-                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
-                    "usp_delete_user",
-                    request,
-                    commandType: CommandType.StoredProcedure);
-                
-        }
-        
-
-    
-        public async Task<OperationResponse> EditUserAsync(EditUserRequest request)
-        {
-            
-                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
-                    "usp_edit_user",
-                    request,
-                    commandType: CommandType.StoredProcedure);
-                
-        }
-        
-
+        _connection = connection;
     }
+
+
+public async Task<OperationResponse> AddUserAsync(AddUserRequest request)
+{
+    
+        return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+            "usp_add_user",
+            request,
+            commandType: CommandType.StoredProcedure);
+        
 }
+
+
+
+public async Task<OperationResponse> DeleteUserAsync(DeleteUserRequest request)
+{
+    
+        return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+            "usp_delete_user",
+            request,
+            commandType: CommandType.StoredProcedure);
+        
+}
+
+
+
+public async Task<OperationResponse> EditUserAsync(EditUserRequest request)
+{
+    
+        return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+            "usp_edit_user",
+            request,
+            commandType: CommandType.StoredProcedure);
+        
+}
+
+
+
+public async Task<LoginUserResponse> LoginUserAsync(LoginUserRequest request)
+{
+    
+        return await _connection.QueryFirstOrDefaultAsync<LoginUserResponse>(
+            "usp_login_user",
+            request,
+            commandType: CommandType.StoredProcedure);
+        
+}
+
+
+}
+
