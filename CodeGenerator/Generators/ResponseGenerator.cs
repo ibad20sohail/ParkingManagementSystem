@@ -57,7 +57,8 @@ public class ResponseGenerator : BaseGenerator
             var model = new
             {
                 Name = $"{procedure.Action}{procedure.Entity}{Cons.Response}",
-                Properties = properties
+                Properties = properties,
+                file_prefix = Cons.FilePrefix
             };
 
             var result = await template.RenderAsync(model);
@@ -81,8 +82,17 @@ public class ResponseGenerator : BaseGenerator
             return;
         }
 
-        var template = await File.ReadAllTextAsync(_operationTemplatePath);
+        var model = new
+        {
+            file_prefix = Cons.FilePrefix,
+        };
+        var templateText = await File.ReadAllTextAsync(_operationTemplatePath);
+        var template = Template.Parse(templateText);
 
-        await WriteFileAsync(filePath, template);
+        var result = await template.RenderAsync(model);
+
+
+
+        await WriteFileAsync(filePath, templateText);
     }
 }

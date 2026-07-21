@@ -52,7 +52,8 @@ public class RequestGenerator  : BaseGenerator
             var model = new
             {
                 Name = $"{procedure.Action}{procedure.Entity}{Cons.Request}",
-                Properties = properties
+                Properties = properties,
+                file_prefix = Cons.FilePrefix
             };
 
             var result = await template.RenderAsync(model);

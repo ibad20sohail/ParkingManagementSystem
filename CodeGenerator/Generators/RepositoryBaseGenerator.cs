@@ -1,4 +1,5 @@
-﻿using CodeGenerator.Generators;
+﻿using CodeGenerator.Constants;
+using CodeGenerator.Generators;
 using CodeGenerator.Helpers;
 using CodeGenerator.Models;
 using Scriban;
@@ -25,7 +26,7 @@ public abstract class RepositoryBaseGenerator : BaseGenerator
             interface_name = repository.InterfaceName,
             class_name = repository.ClassName,
             folder_name = repository.EntityName,
-
+            file_prefix = Cons.FilePrefix,
             methods = repository.Methods.Select(m => new
             {
                 name = m.Name,

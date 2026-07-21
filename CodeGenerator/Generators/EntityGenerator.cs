@@ -1,6 +1,7 @@
 ﻿using Scriban;
 using CodeGenerator.Models;
 using CodeGenerator.Helpers;
+using CodeGenerator.Constants;
 
 namespace CodeGenerator.Generators;
 
@@ -48,7 +49,8 @@ public class EntityGenerator : BaseGenerator
             var model = new
             {
                 name = entityName,
-                properties = properties
+                properties = properties,
+                file_prefix = Cons.FilePrefix,
             };
 
             var result = await template.RenderAsync(model);
