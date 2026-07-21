@@ -10,11 +10,17 @@ namespace PMS.Application.IRepositories.ParkingSpace
     public interface IParkingSpaceRepository
     {
         
-                Task<OperationResponse> AddParkingSpaceAsync(AddParkingSpaceRequest request);
+                    
+                            Task<OperationResponse> AddParkingSpaceAsync(AddParkingSpaceRequest request);
+                        
                 
-                Task<OperationResponse> DeleteParkingSpaceAsync(DeleteParkingSpaceRequest request);
+                    
+                            Task<OperationResponse> DeleteParkingSpaceAsync(DeleteParkingSpaceRequest request);
+                        
                 
-                Task<OperationResponse> EditParkingSpaceAsync(EditParkingSpaceRequest request);
+                    
+                            Task<OperationResponse> EditParkingSpaceAsync(EditParkingSpaceRequest request);
+                        
                 
     }
 }

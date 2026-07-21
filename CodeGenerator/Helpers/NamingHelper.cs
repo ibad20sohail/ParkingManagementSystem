@@ -1,4 +1,6 @@
-﻿namespace CodeGenerator.Helpers
+﻿using Humanizer;
+
+namespace CodeGenerator.Helpers
 {
     public class NamingHelper
     {
@@ -11,6 +13,11 @@
                 value.Split('_', StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => char.ToUpperInvariant(x[0]) + x[1..].ToLowerInvariant())
                 );
+        }
+
+        public static bool IsPlural(string word)
+        {
+            return word != word.Singularize();
         }
     }
 }

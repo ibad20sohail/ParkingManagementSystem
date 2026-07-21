@@ -18,36 +18,42 @@ namespace PMS.Infrastructure.Repositories.User
         {
             _connection = connection;
         }
+
+    
+        public async Task<OperationResponse> AddUserAsync(AddUserRequest request)
+        {
+            
+                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+                    "usp_add_user",
+                    request,
+                    commandType: CommandType.StoredProcedure);
+                
+        }
         
+
+    
+        public async Task<OperationResponse> DeleteUserAsync(DeleteUserRequest request)
+        {
+            
+                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+                    "usp_delete_user",
+                    request,
+                    commandType: CommandType.StoredProcedure);
                 
-                public async Task<OperationResponse> AddUserAsync(AddUserRequest request)
-                {
-                    return await _connection.QuerySingleAsync<OperationResponse>(
-                        "usp_add_user",
-                        request,
-                        commandType: CommandType.StoredProcedure);
-                }
+        }
+        
+
+    
+        public async Task<OperationResponse> EditUserAsync(EditUserRequest request)
+        {
+            
+                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+                    "usp_edit_user",
+                    request,
+                    commandType: CommandType.StoredProcedure);
                 
-                
-                
-                public async Task<OperationResponse> DeleteUserAsync(DeleteUserRequest request)
-                {
-                    return await _connection.QuerySingleAsync<OperationResponse>(
-                        "usp_delete_user",
-                        request,
-                        commandType: CommandType.StoredProcedure);
-                }
-                
-                
-                
-                public async Task<OperationResponse> EditUserAsync(EditUserRequest request)
-                {
-                    return await _connection.QuerySingleAsync<OperationResponse>(
-                        "usp_edit_user",
-                        request,
-                        commandType: CommandType.StoredProcedure);
-                }
-                
-                
+        }
+        
+
     }
 }

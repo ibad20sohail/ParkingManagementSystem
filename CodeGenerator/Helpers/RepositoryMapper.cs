@@ -22,7 +22,8 @@ namespace CodeGenerator.Helpers
                 Name = methodName,
                 RequestType = request,
                 ResponseType = response,
-                ProcedureName = procedure.Name
+                ProcedureName = procedure.Name,
+                ReturnsCollection = procedure.ReturnsCollection
             };
         }
     }

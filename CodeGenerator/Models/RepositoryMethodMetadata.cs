@@ -13,5 +13,6 @@ namespace CodeGenerator.Models
         public string ResponseType { get; set; } = string.Empty;
 
         public string ProcedureName { get; set; } = string.Empty;
+        public bool ReturnsCollection { get; set; }
     }
 }

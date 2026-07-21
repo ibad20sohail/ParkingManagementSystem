@@ -31,7 +31,9 @@ public abstract class RepositoryBaseGenerator : BaseGenerator
                 name = m.Name,
                 request_type = m.RequestType,
                 response_type = m.ResponseType,
-                procedure_name = m.ProcedureName
+                procedure_name = m.ProcedureName,
+                returns_collection = m.ReturnsCollection
+
             })
         };
     }

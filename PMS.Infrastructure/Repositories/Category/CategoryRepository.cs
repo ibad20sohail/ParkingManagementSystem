@@ -18,36 +18,42 @@ namespace PMS.Infrastructure.Repositories.Category
         {
             _connection = connection;
         }
+
+    
+        public async Task<OperationResponse> AddCategoryAsync(AddCategoryRequest request)
+        {
+            
+                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+                    "usp_add_category",
+                    request,
+                    commandType: CommandType.StoredProcedure);
+                
+        }
         
+
+    
+        public async Task<OperationResponse> DeleteCategoryAsync(DeleteCategoryRequest request)
+        {
+            
+                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+                    "usp_delete_category",
+                    request,
+                    commandType: CommandType.StoredProcedure);
                 
-                public async Task<OperationResponse> AddCategoryAsync(AddCategoryRequest request)
-                {
-                    return await _connection.QuerySingleAsync<OperationResponse>(
-                        "usp_add_category",
-                        request,
-                        commandType: CommandType.StoredProcedure);
-                }
+        }
+        
+
+    
+        public async Task<OperationResponse> EditCategoryAsync(EditCategoryRequest request)
+        {
+            
+                return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+                    "usp_edit_category",
+                    request,
+                    commandType: CommandType.StoredProcedure);
                 
-                
-                
-                public async Task<OperationResponse> DeleteCategoryAsync(DeleteCategoryRequest request)
-                {
-                    return await _connection.QuerySingleAsync<OperationResponse>(
-                        "usp_delete_category",
-                        request,
-                        commandType: CommandType.StoredProcedure);
-                }
-                
-                
-                
-                public async Task<OperationResponse> EditCategoryAsync(EditCategoryRequest request)
-                {
-                    return await _connection.QuerySingleAsync<OperationResponse>(
-                        "usp_edit_category",
-                        request,
-                        commandType: CommandType.StoredProcedure);
-                }
-                
-                
+        }
+        
+
     }
 }

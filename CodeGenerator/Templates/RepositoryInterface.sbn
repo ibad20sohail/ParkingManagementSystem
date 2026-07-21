@@ -10,7 +10,11 @@ namespace PMS.Application.IRepositories.{{folder_name}}
     public interface {{interface_name}}
     {
         {{ for method in methods }}
-        Task<{{method.response_type}}> {{method.name}}({{method.request_type}} request);
+            {{ if method.request_type }}
+                Task<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}> {{method.name}}({{method.request_type}} request);
+            {{ else }}
+                Task<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}> {{method.name}}();
+            {{ end }}
         {{ end }}
     }
 }

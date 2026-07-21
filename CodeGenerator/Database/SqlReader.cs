@@ -287,6 +287,7 @@ namespace CodeGenerator.Database
                     Name = procedure,
                     Action = parsed.Action,
                     Entity = parsed.Entity,
+                    ReturnsCollection = parsed.Action.Equals("Get", StringComparison.OrdinalIgnoreCase) && NamingHelper.IsPlural(parsed.Entity),
                     Parameters = parameters,
                     ResultColumns = resultColumns
                 });
