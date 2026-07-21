@@ -91,7 +91,7 @@ ALTER TABLE billings ADD CONSTRAINT FK_billings_payment_methods FOREIGN KEY (pay
 --SP START--
 GO
 CREATE OR ALTER PROCEDURE usp_add_user
-@user_name VARCHAR(30), @password VARCHAR(30)
+@user_name VARCHAR(30), @password VARCHAR(30), @role_id INT
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -99,8 +99,8 @@ BEGIN
 	BEGIN
 		;THROW 50001, 'Username and password is requird.', 1;
 	END
-	INSERT INTO Users (user_name, password_hash) 
-	VALUES (@user_name, HASHBYTES('SHA2_512', @password));
+	INSERT INTO Users (user_name, password_hash,role_id) 
+	VALUES (@user_name, HASHBYTES('SHA2_512', @password),@role_id);
 	SELECT 'User has been added successfully.' AS Message;
 	RETURN;
 END
@@ -293,6 +293,44 @@ BEGIN
 	SELECT 'Parking space has been deleted' AS Message;
 	RETURN;
 END
+GO
+CREATE OR ALTER PROCEDURE usp_login_user
+@user_name VARCHAR(30), @password VARCHAR(500)
+AS
+BEGIN 
+	SET NOCOUNT ON;
+	SET XACT_ABORT ON; 
+
+	IF NULLIF(@user_name,'') IS NULL OR NULLIF(@password,'') IS NULL
+	BEGIN
+		;THROW 50001, 'Username and password is required.',1;
+	END
+
+	DECLARE @stored_user_id INT;
+	DECLARE @stored_hashed_password VARBINARY(64);
+	DECLARE @stored_role_name VARCHAR(20);
+	DECLARE @stored_role_id INT;
+
+	SELECT 
+		@stored_user_id = u.user_id,
+		@stored_hashed_password = u.password_hash,
+		@stored_role_name = r.name,
+		@stored_role_id = u.role_id
+	FROM users u LEFT JOIN roles r ON u.role_id = r.role_id
+	WHERE u.user_name = @user_name AND u.is_active = 1;
+
+	IF @stored_user_id IS NULL OR @stored_hashed_password <> HASHBYTES('SHA2_512',@password)
+	BEGIN
+		;THROW 50001, 'Invalid credentials',2;
+	END
+
+	SELECT 
+		@stored_user_id AS user_id,
+		@user_name AS user_name,
+		@stored_role_id AS role_id,
+		@stored_role_name AS role_name;
+	RETURN;
+END
 --SP END--
 
 --FUNCTION START--
@@ -350,4 +388,7 @@ END
 GO
 EXEC usp_add_role 'admin';
 EXEC usp_add_role 'operator';
+
+EXEC usp_add_user @user_name = 'operator',@password = 'operator', @role_id = 2;
 --INSERT END--
+select * from roles;
