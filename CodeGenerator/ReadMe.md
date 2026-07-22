@@ -374,15 +374,3 @@ IUserRepository.cs deleted
 Generated code will automatically reflect the latest database changes.
 
 ---
-
-## Future Enhancements
-
-- Enum generation
-- FluentValidation generation
-- Controller generation
-- API endpoint generation
-- Unit test generation
-- DTO mapping generation
-- Stored procedure documentation generation
-- Incremental generation
-- Multi-database support
