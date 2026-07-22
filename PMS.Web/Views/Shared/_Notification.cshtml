@@ -1,0 +1,66 @@
+﻿@using PMS.Application.Constants
+@{
+    string? message = null;
+    string toastClass = "toast-primary";
+    string title = "Notification";
+    string icon = "bi-info-circle-fill";
+
+    if (TempData[Cons.Success] != null)
+    {
+        message = TempData[Cons.Success]?.ToString();
+        toastClass = "toast-success";
+        title = "Success";
+        icon = "bi-check-circle-fill";
+    }
+    else if (TempData[Cons.Error] != null)
+    {
+        message = TempData[Cons.Error]?.ToString();
+        toastClass = "toast-danger";
+        title = "Error";
+        icon = "bi-x-circle-fill";
+    }
+    else if (TempData[Cons.Warning] != null)
+    {
+        message = TempData[Cons.Warning]?.ToString();
+        toastClass = "toast-warning";
+        title = "Warning";
+        icon = "bi-exclamation-triangle-fill";
+    }
+    else if (TempData[Cons.Info] != null)
+    {
+        message = TempData[Cons.Info]?.ToString();
+        toastClass = "toast-info";
+        title = "Information";
+        icon = "bi-info-circle-fill";
+    }
+}
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="appToast"
+             class="toast @toastClass"
+             role="alert"
+             aria-live="assertive"
+             aria-atomic="true">
+            <div class="toast-header">
+                <i class="bi @icon me-2"></i>
+                <strong class="me-auto">@title</strong>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                @message
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const toast = document.getElementById("appToast");
+            bootstrap.Toast.getOrCreateInstance(toast).show();
+        });
+    </script>
+}
