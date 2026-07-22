@@ -6,15 +6,9 @@ namespace PMS.Domain.Entities;
 
 public partial class Billings
 {
-
-	public int BillingId { get; set; }
-
-	public int TicketId { get; set; }
-
-	public int PaymentMethodId { get; set; }
-
-	public decimal? Amount { get; set; }
-
-	public DateTime CreatedAt { get; set; }
-
+    public int BillingId { get; set; }
+    public int TicketId { get; set; }
+    public int PaymentMethodId { get; set; }
+    public decimal? Amount { get; set; }
+    public DateTime CreatedAt { get; set; }
 }

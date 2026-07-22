@@ -6,7 +6,5 @@ namespace PMS.Application.Models.Requests;
 
 public class AddCategoryRequest
 {
-
     public string Name { get; set; }
-
 }

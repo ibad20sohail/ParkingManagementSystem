@@ -7,6 +7,7 @@ using System.Data;
 using PMS.Application.IRepositories.ParkingSpace;
 using PMS.Application.Models.Requests;
 using PMS.Application.Models.Responses;
+using PMS.Application.Models.Responses.Common;
 
 namespace PMS.Infrastructure.Repositories.ParkingSpace;
 
@@ -19,41 +20,42 @@ public class ParkingSpaceRepository : IParkingSpaceRepository
         _connection = connection;
     }
 
+    public async Task<OperationResponse> AddParkingSpaceAsync(AddParkingSpaceRequest request)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@floor", request.Floor);
+        parameters.Add("@code", request.Code);
+        parameters.Add("@parking_space_status_id", request.ParkingSpaceStatusId);
 
-public async Task<OperationResponse> AddParkingSpaceAsync(AddParkingSpaceRequest request)
-{
-    
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_add_parking_space",
-            request,
+            parameters,
             commandType: CommandType.StoredProcedure);
-        
-}
+    }
 
+    public async Task<OperationResponse> DeleteParkingSpaceAsync(DeleteParkingSpaceRequest request)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@parking_space_id", request.ParkingSpaceId);
 
-
-public async Task<OperationResponse> DeleteParkingSpaceAsync(DeleteParkingSpaceRequest request)
-{
-    
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_delete_parking_space",
-            request,
+            parameters,
             commandType: CommandType.StoredProcedure);
-        
-}
+    }
 
+    public async Task<OperationResponse> EditParkingSpaceAsync(EditParkingSpaceRequest request)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@parking_space_id", request.ParkingSpaceId);
+        parameters.Add("@floor", request.Floor);
+        parameters.Add("@code", request.Code);
+        parameters.Add("@parking_space_status_id", request.ParkingSpaceStatusId);
 
-
-public async Task<OperationResponse> EditParkingSpaceAsync(EditParkingSpaceRequest request)
-{
-    
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_edit_parking_space",
-            request,
+            parameters,
             commandType: CommandType.StoredProcedure);
-        
-}
-
+    }
 
 }
-

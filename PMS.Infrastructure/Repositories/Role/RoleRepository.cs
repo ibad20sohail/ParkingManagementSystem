@@ -7,6 +7,7 @@ using System.Data;
 using PMS.Application.IRepositories.Role;
 using PMS.Application.Models.Requests;
 using PMS.Application.Models.Responses;
+using PMS.Application.Models.Responses.Common;
 
 namespace PMS.Infrastructure.Repositories.Role;
 
@@ -19,41 +20,38 @@ public class RoleRepository : IRoleRepository
         _connection = connection;
     }
 
+    public async Task<OperationResponse> AddRoleAsync(AddRoleRequest request)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@name", request.Name);
 
-public async Task<OperationResponse> AddRoleAsync(AddRoleRequest request)
-{
-    
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_add_role",
-            request,
+            parameters,
             commandType: CommandType.StoredProcedure);
-        
-}
+    }
 
+    public async Task<OperationResponse> DeleteRoleAsync(DeleteRoleRequest request)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@role_id", request.RoleId);
 
-
-public async Task<OperationResponse> DeleteRoleAsync(DeleteRoleRequest request)
-{
-    
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_delete_role",
-            request,
+            parameters,
             commandType: CommandType.StoredProcedure);
-        
-}
+    }
 
+    public async Task<OperationResponse> EditRoleAsync(EditRoleRequest request)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@role_id", request.RoleId);
+        parameters.Add("@name", request.Name);
 
-
-public async Task<OperationResponse> EditRoleAsync(EditRoleRequest request)
-{
-    
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_edit_role",
-            request,
+            parameters,
             commandType: CommandType.StoredProcedure);
-        
-}
-
+    }
 
 }
-

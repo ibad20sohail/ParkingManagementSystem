@@ -6,15 +6,9 @@ namespace PMS.Domain.Entities;
 
 public partial class Users
 {
-
-	public int UserId { get; set; }
-
-	public int RoleId { get; set; }
-
-	public string UserName { get; set; }
-
-	public string PasswordHash { get; set; }
-
-	public bool? IsActive { get; set; }
-
+    public int UserId { get; set; }
+    public int RoleId { get; set; }
+    public string UserName { get; set; }
+    public string PasswordHash { get; set; }
+    public bool? IsActive { get; set; }
 }

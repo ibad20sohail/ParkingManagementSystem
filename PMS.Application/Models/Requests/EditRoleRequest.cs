@@ -6,9 +6,6 @@ namespace PMS.Application.Models.Requests;
 
 public class EditRoleRequest
 {
-
     public int RoleId { get; set; }
-
     public string Name { get; set; }
-
 }

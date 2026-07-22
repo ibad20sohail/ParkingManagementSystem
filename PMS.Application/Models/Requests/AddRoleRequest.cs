@@ -6,7 +6,5 @@ namespace PMS.Application.Models.Requests;
 
 public class AddRoleRequest
 {
-
     public string Name { get; set; }
-
 }

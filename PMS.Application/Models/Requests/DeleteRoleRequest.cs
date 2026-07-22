@@ -6,7 +6,5 @@ namespace PMS.Application.Models.Requests;
 
 public class DeleteRoleRequest
 {
-
     public int RoleId { get; set; }
-
 }

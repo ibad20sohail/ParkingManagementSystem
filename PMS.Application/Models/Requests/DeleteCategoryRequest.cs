@@ -6,7 +6,5 @@ namespace PMS.Application.Models.Requests;
 
 public class DeleteCategoryRequest
 {
-
     public int CategoryId { get; set; }
-
 }

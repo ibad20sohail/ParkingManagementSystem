@@ -7,6 +7,7 @@ using System.Data;
 using PMS.Application.IRepositories.User;
 using PMS.Application.Models.Requests;
 using PMS.Application.Models.Responses;
+using PMS.Application.Models.Responses.Common;
 
 namespace PMS.Infrastructure.Repositories.User;
 
@@ -19,53 +20,55 @@ public class UserRepository : IUserRepository
         _connection = connection;
     }
 
+    public async Task<OperationResponse> AddUserAsync(AddUserRequest request)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@user_name", request.UserName);
+        parameters.Add("@password", request.Password);
+        parameters.Add("@role_id", request.RoleId);
 
-public async Task<OperationResponse> AddUserAsync(AddUserRequest request)
-{
-    
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_add_user",
-            request,
+            parameters,
             commandType: CommandType.StoredProcedure);
-        
-}
+    }
 
+    public async Task<OperationResponse> DeleteUserAsync(DeleteUserRequest request)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@user_id", request.UserId);
 
-
-public async Task<OperationResponse> DeleteUserAsync(DeleteUserRequest request)
-{
-    
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_delete_user",
-            request,
+            parameters,
             commandType: CommandType.StoredProcedure);
-        
-}
+    }
 
+    public async Task<OperationResponse> EditUserAsync(EditUserRequest request)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@user_id", request.UserId);
+        parameters.Add("@user_name", request.UserName);
+        parameters.Add("@old_password", request.OldPassword);
+        parameters.Add("@new_password", request.NewPassword);
+        parameters.Add("@confirm_new_password", request.ConfirmNewPassword);
 
-
-public async Task<OperationResponse> EditUserAsync(EditUserRequest request)
-{
-    
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_edit_user",
-            request,
+            parameters,
             commandType: CommandType.StoredProcedure);
-        
-}
+    }
 
+    public async Task<LoginUserResponse> LoginUserAsync(LoginUserRequest request)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@user_name", request.UserName);
+        parameters.Add("@password", request.Password);
 
-
-public async Task<LoginUserResponse> LoginUserAsync(LoginUserRequest request)
-{
-    
         return await _connection.QueryFirstOrDefaultAsync<LoginUserResponse>(
             "usp_login_user",
-            request,
+            parameters,
             commandType: CommandType.StoredProcedure);
-        
-}
-
+    }
 
 }
-

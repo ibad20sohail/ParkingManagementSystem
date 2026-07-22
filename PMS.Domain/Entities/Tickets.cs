@@ -6,27 +6,15 @@ namespace PMS.Domain.Entities;
 
 public partial class Tickets
 {
-
-	public int TicketId { get; set; }
-
-	public string LicenseNo { get; set; }
-
-	public string? DriverName { get; set; }
-
-	public string? Company { get; set; }
-
-	public string? ModelNo { get; set; }
-
-	public DateTime IssuedAt { get; set; }
-
-	public DateTime? ExpiresAt { get; set; }
-
-	public bool? IsUsed { get; set; }
-
-	public int CategoryId { get; set; }
-
-	public int? ParkingSpaceId { get; set; }
-
-	public int UserId { get; set; }
-
+    public int TicketId { get; set; }
+    public string LicenseNo { get; set; }
+    public string? DriverName { get; set; }
+    public string? Company { get; set; }
+    public string? ModelNo { get; set; }
+    public DateTime IssuedAt { get; set; }
+    public DateTime? ExpiresAt { get; set; }
+    public bool? IsUsed { get; set; }
+    public int CategoryId { get; set; }
+    public int? ParkingSpaceId { get; set; }
+    public int UserId { get; set; }
 }

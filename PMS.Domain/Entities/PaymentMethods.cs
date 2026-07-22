@@ -6,9 +6,6 @@ namespace PMS.Domain.Entities;
 
 public partial class PaymentMethods
 {
-
-	public int PaymentMethodId { get; set; }
-
-	public string PaymentType { get; set; }
-
+    public int PaymentMethodId { get; set; }
+    public string PaymentType { get; set; }
 }

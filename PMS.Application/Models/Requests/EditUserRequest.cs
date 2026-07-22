@@ -6,15 +6,9 @@ namespace PMS.Application.Models.Requests;
 
 public class EditUserRequest
 {
-
     public int UserId { get; set; }
-
     public string UserName { get; set; }
-
     public string OldPassword { get; set; }
-
     public string NewPassword { get; set; }
-
     public string ConfirmNewPassword { get; set; }
-
 }

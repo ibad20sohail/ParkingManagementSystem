@@ -6,9 +6,6 @@ namespace PMS.Domain.Entities;
 
 public partial class ParkingSpaceStatuses
 {
-
-	public int ParkingSpaceStatusId { get; set; }
-
-	public string Name { get; set; }
-
+    public int ParkingSpaceStatusId { get; set; }
+    public string Name { get; set; }
 }

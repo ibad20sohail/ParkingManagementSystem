@@ -7,6 +7,7 @@ using System.Data;
 using PMS.Application.IRepositories.Category;
 using PMS.Application.Models.Requests;
 using PMS.Application.Models.Responses;
+using PMS.Application.Models.Responses.Common;
 
 namespace PMS.Infrastructure.Repositories.Category;
 
@@ -19,41 +20,38 @@ public class CategoryRepository : ICategoryRepository
         _connection = connection;
     }
 
+    public async Task<OperationResponse> AddCategoryAsync(AddCategoryRequest request)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@name", request.Name);
 
-public async Task<OperationResponse> AddCategoryAsync(AddCategoryRequest request)
-{
-    
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_add_category",
-            request,
+            parameters,
             commandType: CommandType.StoredProcedure);
-        
-}
+    }
 
+    public async Task<OperationResponse> DeleteCategoryAsync(DeleteCategoryRequest request)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@category_id", request.CategoryId);
 
-
-public async Task<OperationResponse> DeleteCategoryAsync(DeleteCategoryRequest request)
-{
-    
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_delete_category",
-            request,
+            parameters,
             commandType: CommandType.StoredProcedure);
-        
-}
+    }
 
+    public async Task<OperationResponse> EditCategoryAsync(EditCategoryRequest request)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@category_id", request.CategoryId);
+        parameters.Add("@name", request.Name);
 
-
-public async Task<OperationResponse> EditCategoryAsync(EditCategoryRequest request)
-{
-    
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_edit_category",
-            request,
+            parameters,
             commandType: CommandType.StoredProcedure);
-        
-}
-
+    }
 
 }
-

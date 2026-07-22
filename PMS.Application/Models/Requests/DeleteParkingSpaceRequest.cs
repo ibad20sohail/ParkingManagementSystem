@@ -6,7 +6,5 @@ namespace PMS.Application.Models.Requests;
 
 public class DeleteParkingSpaceRequest
 {
-
     public int ParkingSpaceId { get; set; }
-
 }
