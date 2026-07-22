@@ -1,4 +1,5 @@
-﻿@{
+﻿@model LoginUserRequest;
+@{
     ViewData["Title"] = "Login";
     Layout = null;
 }
@@ -38,6 +39,7 @@
 <!--end::Head-->
 <!--begin::Body-->
 <body class="login-page bg-body-secondary">
+    <partial name="_Notification" />
     <div class="login-box">
         <div class="card card-outline card-primary">
             <div class="card-header">
@@ -45,18 +47,18 @@
             </div>
             <div class="card-body login-card-body">
                 <p class="login-box-msg">Sign in to start your session</p>
-                <form action="login" method="post">
+                <form method="post">
                     <div class="input-group mb-1">
                         <div class="form-floating">
-                            <input id="loginUsername" type="text" class="form-control" value="" placeholder="" />
-                            <label for="loginUsername">Username</label>
+                            <input asp-for="UserName" type="text" class="form-control" value="" placeholder="" />
+                            <label>Username</label>
                         </div>
                         <div class="input-group-text"><span class="bi bi-person-fill"></span></div>
                     </div>
                     <div class="input-group mb-1">
                         <div class="form-floating">
-                            <input id="loginPassword" type="password" class="form-control" placeholder="" />
-                            <label for="loginPassword">Password</label>
+                            <input asp-for="Password" type="password" class="form-control" placeholder="" />
+                            <label>Password</label>
                         </div>
                         <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
                     </div>
