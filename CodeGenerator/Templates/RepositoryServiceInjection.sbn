@@ -1,0 +1,23 @@
+﻿{{file_prefix}}
+
+using {{using_dependency_injection}};
+{{~ for item in interface_usings ~}}
+using {{item}};
+{{~ end ~}}
+{{~ for item in implementation_usings ~}}
+using {{item}};
+{{~ end ~}}
+
+namespace {{name_space}};
+
+public static class {{class_name}}
+{
+    public static IServiceCollection AddRepositories(this IServiceCollection services)
+    {
+{{~ for repository in repositories ~}}
+        services.AddScoped<{{repository.interface_name}}, {{repository.class_name}}>();
+{{~ end ~}}
+
+        return services;
+    }
+}

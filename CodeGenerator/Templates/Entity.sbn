@@ -1,10 +1,10 @@
 ﻿{{file_prefix}}
 
-namespace PMS.Domain.Entities;
+namespace {{name_space}};
 
 public partial class {{name}}
 {
-{{ for property in properties }}
-	public {{property.type}} {{property.name}} { get; set; }
-{{ end }}
+{{~ for property in properties ~}}
+    public {{property.type}} {{property.name}} { get; set; }
+{{~ end ~}}
 }

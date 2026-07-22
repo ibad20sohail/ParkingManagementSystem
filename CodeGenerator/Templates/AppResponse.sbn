@@ -1,0 +1,30 @@
+﻿{{ file_prefix }}
+
+namespace {{ name_space }};
+
+public class AppResponse<T>
+{
+    public T Model { get; set; }
+    public bool IsSuccess { get; set; }
+    public string Message { get; set; }
+
+    public static AppResponse<T> Success(T model, string message = "Success")
+    {
+        return new AppResponse<T>
+        {
+            IsSuccess = true,
+            Message = message,
+            Model = model
+        };
+    }
+
+    public static AppResponse<T> Failure(string message, T model = default)
+    {
+        return new AppResponse<T>
+        {
+            IsSuccess = false,
+            Message = message,
+            Model = model
+        };
+    }
+}

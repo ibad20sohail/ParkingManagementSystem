@@ -1,17 +1,19 @@
 ﻿{{file_prefix}}
 
-using PMS.Application.Models.Requests;
-using PMS.Application.Models.Responses;
+using {{using_response}};
+using {{using_request}};
+using {{using_common}};
 
-namespace PMS.Application.IRepositories.{{folder_name}};
+namespace {{name_space_interface}};
 
 public interface {{interface_name}}
 {
-    {{ for method in methods }}
-        {{ if method.request_type }}
-            Task<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}> {{method.name}}({{method.request_type}} request);
-        {{ else }}
-            Task<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}> {{method.name}}();
-        {{ end }}
-    {{ end }}
+{{~ for method in methods ~}}
+{{~ if method.request_type ~}}
+    Task<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}> {{method.name}}({{method.request_type}} request);
+{{~ else ~}}
+    Task<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}> {{method.name}}();
+{{~ end ~}}
+
+{{~ end ~}}
 }

@@ -23,9 +23,11 @@ await requestGenerator.GenerateAsync(procedures, outputForRequest);
 
 var responsePath = Path.GetFullPath(Cons.ResponseTemplatePath);
 var operationResponsePath = Path.GetFullPath(Cons.OperationResponseTemplatePath);
-var responseGenerator = new ResponseGenerator(requestPath, operationResponsePath);
+var appResponsePath = Path.GetFullPath(Cons.AppResponseTemplatePath);
+var responseGenerator = new ResponseGenerator(requestPath, operationResponsePath, appResponsePath);
 var outputForResponse = Path.Combine(solutionRoot, Cons.ResponseGenerationPath);
-await responseGenerator.GenerateAsync(procedures, outputForResponse);
+var outputForCommonResponse = Path.Combine(solutionRoot, Cons.CommonResponseGenerationPath);
+await responseGenerator.GenerateAsync(procedures, outputForResponse, outputForCommonResponse);
 
 var repoInterfacePath = Path.GetFullPath(Cons.RepositoryInterfaceTemplatePath);
 var repoInterfaceGenerator = new RepositoryInterfaceGenerator(repoInterfacePath);
@@ -36,4 +38,9 @@ var repoImplementationPath = Path.GetFullPath(Cons.RepositoryImplementationTempl
 var repoImplementationGenerator = new RepositoryImplementationGenerator(repoImplementationPath);
 var outputForRepoImplementation = Path.Combine(solutionRoot, Cons.RepositoryImplementationGenerationPath);
 await repoImplementationGenerator.GenerateAsync(procedures, outputForRepoImplementation);
+
+var repoDIPath = Path.GetFullPath(Cons.DependencyInjectionTemplatePath);
+var repoDIGenerator = new DependencyInjectionGenerator(repoDIPath);
+var outputForDI = Path.Combine(solutionRoot, Cons.DependencyInjectionGenerationPath);
+await repoDIGenerator.GenerateAsync(procedures, outputForDI);
 

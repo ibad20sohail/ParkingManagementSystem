@@ -1,45 +1,41 @@
 ﻿using CodeGenerator.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace CodeGenerator.Generators
+namespace CodeGenerator.Generators;
+
+public class RepositoryImplementationGenerator : RepositoryBaseGenerator
 {
-    public class RepositoryImplementationGenerator : RepositoryBaseGenerator
+    private readonly string _templatePath;
+
+    public RepositoryImplementationGenerator(string templatePath)
     {
-        private readonly string _templatePath;
+        _templatePath = templatePath;
+    }
 
-        public RepositoryImplementationGenerator(string templatePath)
+    public async Task GenerateAsync(List<ProcedureMetadata> procedures, string outputFolder)
+    {
+        Console.WriteLine("--------Repository Implementation--------\n");
+
+        Directory.CreateDirectory(outputFolder);
+
+        var repositories = BuildRepositories(procedures);
+
+        var expectedFiles = repositories
+            .Select(r => $"{r.ClassName}.cs")
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        await DeleteOrphanFilesAsync(outputFolder, expectedFiles);
+
+        foreach (var repository in repositories)
         {
-            _templatePath = templatePath;
+            var folder = Path.Combine(outputFolder, repository.EntityName);
+
+            Directory.CreateDirectory(folder);
+
+            var result = await RenderTemplateAsync(_templatePath, BuildModel(repository));
+
+            await WriteFileAsync(Path.Combine(folder, $"{repository.ClassName}.cs"), result);
         }
 
-        public async Task GenerateAsync(List<ProcedureMetadata> procedures, string outputFolder)
-        {
-            Console.WriteLine("--------Repository Implementation--------\n");
-
-            Directory.CreateDirectory(outputFolder);
-
-            var repositories = BuildRepositories(procedures);
-
-            var expectedFiles = repositories
-                .Select(r => $"{r.ClassName}.cs")
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-            await DeleteOrphanFilesAsync(outputFolder, expectedFiles);
-
-            foreach (var repository in repositories)
-            {
-                var folder = Path.Combine(outputFolder, repository.EntityName);
-
-                Directory.CreateDirectory(folder);
-
-                var result = await RenderTemplateAsync(_templatePath, BuildModel(repository));
-
-                await WriteFileAsync(Path.Combine(folder, $"{repository.ClassName}.cs"), result);
-            }
-
-            Console.WriteLine("\n\n");
-        }
+        Console.WriteLine("\n\n");
     }
 }

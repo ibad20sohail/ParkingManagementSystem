@@ -1,10 +1,10 @@
 ﻿{{file_prefix}}
 
-namespace PMS.Application.Models.Requests;
+namespace {{name_space}};
 
 public class {{name}}
 {
-{{ for property in properties }}
+{{~ for property in properties ~}}
     public {{property.type}} {{property.name}} { get; set; }
-{{ end }}
+{{~ end ~}}
 }

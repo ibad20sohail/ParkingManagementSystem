@@ -1,59 +1,57 @@
 ﻿using CodeGenerator.Constants;
 
-namespace CodeGenerator.Generators
+namespace CodeGenerator.Generators;
+public abstract class BaseGenerator
 {
-    public abstract class BaseGenerator
+    protected async Task DeleteOrphanFilesAsync(string outputFolder, HashSet<string> expectedFiles)
     {
-        protected async Task DeleteOrphanFilesAsync(string outputFolder, HashSet<string> expectedFiles)
+        var files = Directory.GetFiles(outputFolder, "*.cs");
+
+        foreach (var file in files)
         {
-            var files = Directory.GetFiles(outputFolder, "*.cs");
+            var content = await File.ReadAllTextAsync(file);
 
-            foreach (var file in files)
+            if (!content.Contains(Cons.FilePrefix))
+                continue;
+
+            var fileName = Path.GetFileName(file);
+
+            if (!expectedFiles.Contains(fileName) /*&& !fileName.Contains($"{Cons.Operation}{Cons.Response}.cs")*/)
             {
-                var content = await File.ReadAllTextAsync(file);
-
-                if (!content.Contains(Cons.FilePrefix))
-                    continue;
-
-                var fileName = Path.GetFileName(file);
-
-                if (!expectedFiles.Contains(fileName) && !fileName.Contains($"{Cons.Operation}{Cons.Response}.cs"))
-                {
-                    File.Delete(file);
-                    Console.WriteLine($"Deleted: {fileName}");
-                }
+                File.Delete(file);
+                Console.WriteLine($"Deleted: {fileName}");
             }
         }
-        protected async Task WriteFileAsync(string filePath, string content)
+    }
+    protected async Task WriteFileAsync(string filePath, string content)
+    {
+        if (File.Exists(filePath))
         {
-            if (File.Exists(filePath))
-            {
-                var existing = await File.ReadAllTextAsync(filePath);
+            var existing = await File.ReadAllTextAsync(filePath);
 
-                if (Normalize(existing) == Normalize(content))
-                {
-                    Console.WriteLine($"Skipped: {Path.GetFileName(filePath)}");
-                    return;
-                }
-
-                await File.WriteAllTextAsync(filePath, content);
-                Console.WriteLine($"Updated: {Path.GetFileName(filePath)}");
-            }
-            else
+            if (Normalize(existing) == Normalize(content))
             {
-                await File.WriteAllTextAsync(filePath, content);
-                Console.WriteLine($"Created: {Path.GetFileName(filePath)}");
+                Console.WriteLine($"Skipped: {Path.GetFileName(filePath)}");
+                return;
             }
-            
+
+            await File.WriteAllTextAsync(filePath, content);
+            Console.WriteLine($"Updated: {Path.GetFileName(filePath)}");
         }
-        protected static string Normalize(string text)
+        else
         {
-            return string.Join(
-                Environment.NewLine,
-                text.Replace("\r\n", "\n")
-                    .Split('\n')
-                    .Select(x => x.TrimEnd())
-            ).Trim();
+            await File.WriteAllTextAsync(filePath, content);
+            Console.WriteLine($"Created: {Path.GetFileName(filePath)}");
         }
+        
+    }
+    protected static string Normalize(string text)
+    {
+        return string.Join(
+            Environment.NewLine,
+            text.Replace("\r\n", "\n")
+                .Split('\n')
+                .Select(x => x.TrimEnd())
+        ).Trim();
     }
 }

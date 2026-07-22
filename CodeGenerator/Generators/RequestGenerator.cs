@@ -53,7 +53,8 @@ public class RequestGenerator  : BaseGenerator
             {
                 Name = $"{procedure.Action}{procedure.Entity}{Cons.Request}",
                 Properties = properties,
-                file_prefix = Cons.FilePrefix
+                file_prefix = Cons.FilePrefix,
+                name_space = Cons.RequestGenerationPath.Replace('\\','.')
             };
 
             var result = await template.RenderAsync(model);

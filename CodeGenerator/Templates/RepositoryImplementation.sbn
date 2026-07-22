@@ -1,12 +1,13 @@
 ﻿{{file_prefix}}
 
-using Dapper;
-using System.Data;
-using PMS.Application.IRepositories.{{folder_name}};
-using PMS.Application.Models.Requests;
-using PMS.Application.Models.Responses;
+using {{using_dapper}};
+using {{using_sytem_data}};
+using {{name_space_interface}};
+using {{using_request}};
+using {{using_response}};
+using {{using_common}};
 
-namespace PMS.Infrastructure.Repositories.{{folder_name}};
+namespace {{name_space_implementation}};
 
 public class {{class_name}} : {{interface_name}}
 {
@@ -16,36 +17,42 @@ public class {{class_name}} : {{interface_name}}
     {
         _connection = connection;
     }
-{{ for method in methods }}
-{{ if method.request_type }}
-public async Task<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}> {{method.name}}({{method.request_type}} request)
-{
-    {{ if method.returns_collection }}
-    return (await _connection.QueryAsync<{{method.response_type}}>(
-        "{{method.procedure_name}}",
-        request,
-        commandType: CommandType.StoredProcedure)).ToList();
-    {{ else }}
-    return await _connection.QueryFirstOrDefaultAsync<{{method.response_type}}>(
-        "{{method.procedure_name}}",
-        request,
-        commandType: CommandType.StoredProcedure);
-    {{ end }}
-}
-{{ else }}
-public async Task<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}> {{method.name}}()
-{
-    {{ if method.returns_collection }}
-    return (await _connection.QueryAsync<{{method.response_type}}>(
-        "{{method.procedure_name}}",
-        commandType: CommandType.StoredProcedure)).ToList();
-    {{ else }}
-    return await _connection.QueryFirstOrDefaultAsync<{{method.response_type}}>(
-        "{{method.procedure_name}}",
-        commandType: CommandType.StoredProcedure);
-    {{ end }}
-}
-{{ end }}
-{{ end }}
-}
 
+{{~ for method in methods ~}}
+{{~ if method.request_type ~}}
+    public async Task<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}> {{method.name}}({{method.request_type}} request)
+    {
+        var parameters = new DynamicParameters();
+{{~ for parameter in method.parameters ~}}
+        parameters.Add("@{{parameter.sql_name}}", request.{{parameter.property_name}});
+{{~ end ~}}
+
+{{~ if method.returns_collection ~}}
+        return (await _connection.QueryAsync<{{method.response_type}}>(
+            "{{method.procedure_name}}",
+            parameters,
+            commandType: CommandType.StoredProcedure)).ToList();
+{{~ else ~}}
+        return await _connection.QueryFirstOrDefaultAsync<{{method.response_type}}>(
+            "{{method.procedure_name}}",
+            parameters,
+            commandType: CommandType.StoredProcedure);
+{{~ end ~}}
+    }
+{{~ else ~}}
+    public async Task<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}> {{method.name}}()
+    {
+{{~ if method.returns_collection ~}}
+        return (await _connection.QueryAsync<{{method.response_type}}>(
+            "{{method.procedure_name}}",
+            commandType: CommandType.StoredProcedure)).ToList();
+{{~ else ~}}
+        return await _connection.QueryFirstOrDefaultAsync<{{method.response_type}}>(
+            "{{method.procedure_name}}",
+            commandType: CommandType.StoredProcedure);
+{{~ end ~}}
+    }
+{{~ end ~}}
+
+{{~ end ~}}
+}

@@ -45,12 +45,13 @@ public class EntityGenerator : BaseGenerator
             });
 
             var entityName = NamingHelper.ToPascalCase(table.Name);
-            
+
             var model = new
             {
                 name = entityName,
                 properties = properties,
                 file_prefix = Cons.FilePrefix,
+                name_space = Cons.EntityGenerationPath.Replace('\\','.')
             };
 
             var result = await template.RenderAsync(model);

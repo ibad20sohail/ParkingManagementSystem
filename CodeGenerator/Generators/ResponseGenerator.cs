@@ -8,17 +8,19 @@ namespace CodeGenerator.Generators;
 public class ResponseGenerator : BaseGenerator
 {
     private readonly string _responseTemplatePath;
-    private readonly string _operationTemplatePath;
+    private readonly string _operationResponseTemplatePath;
+    private readonly string _appResponseTemplatePath;
 
 
-    public ResponseGenerator(string responseTemplatePath,string operationTemplatePath)
+    public ResponseGenerator(string responseTemplatePath,string operationResponseTemplatePath, string appResponseTemplatePath)
     {
         _responseTemplatePath = responseTemplatePath;
-        _operationTemplatePath = operationTemplatePath;
+        _operationResponseTemplatePath = operationResponseTemplatePath;
+        _appResponseTemplatePath = appResponseTemplatePath;
     }
 
 
-    public async Task GenerateAsync(List<ProcedureMetadata> procedures, string outputFolder)
+    public async Task GenerateAsync(List<ProcedureMetadata> procedures, string outputFolder, string commonOutputFolder)
     {
         Console.WriteLine("--------Response Model--------\n");
 
@@ -32,7 +34,9 @@ public class ResponseGenerator : BaseGenerator
 
         await DeleteOrphanFilesAsync(outputFolder, expectedFiles);
 
-        await GenerateOperationResponseAsync(outputFolder);
+        await GenerateOperationResponseAsync(commonOutputFolder);
+
+        await GenerateAppResponseAsync(commonOutputFolder);
 
         var templateText = await File.ReadAllTextAsync(_responseTemplatePath);
 
@@ -50,20 +54,21 @@ public class ResponseGenerator : BaseGenerator
 
             var properties = procedure.ResultColumns.Select(c => new
             {
-                Name = NamingHelper.ToPascalCase(c.Name),
-                Type = SqlTypeMapper.Map(c.SqlType, c.IsNullable)
+                name = NamingHelper.ToPascalCase(c.Name),
+                type = SqlTypeMapper.Map(c.SqlType, c.IsNullable)
             });
 
             var model = new
             {
-                Name = $"{procedure.Action}{procedure.Entity}{Cons.Response}",
-                Properties = properties,
-                file_prefix = Cons.FilePrefix
+                name = $"{procedure.Action}{procedure.Entity}{Cons.Response}",
+                properties = properties,
+                file_prefix = Cons.FilePrefix,
+                name_space = Cons.ResponseGenerationPath.Replace('\\','.')
             };
 
             var result = await template.RenderAsync(model);
 
-            var filePath = Path.Combine(outputFolder, $"{model.Name}.cs");
+            var filePath = Path.Combine(outputFolder, $"{model.name}.cs");
 
             await WriteFileAsync(filePath, result);
         }
@@ -71,28 +76,53 @@ public class ResponseGenerator : BaseGenerator
 
     }
 
-
     private async Task GenerateOperationResponseAsync(string outputFolder)
     {
+        Directory.CreateDirectory(outputFolder);
+
         var filePath = Path.Combine(outputFolder, $"{Cons.Operation}{Cons.Response}.cs");
 
-        if (File.Exists(filePath))
-        {
-            Console.WriteLine($"Skipped: {Cons.Operation}{Cons.Response}.cs");
-            return;
-        }
+        //if (File.Exists(filePath))
+        //{
+        //    Console.WriteLine($"Skipped: {Cons.Operation}{Cons.Response}.cs");
+        //    return;
+        //}
 
         var model = new
         {
             file_prefix = Cons.FilePrefix,
+            name_space = Cons.CommonResponseGenerationPath.Replace('\\', '.')
         };
-        var templateText = await File.ReadAllTextAsync(_operationTemplatePath);
+        var templateText = await File.ReadAllTextAsync(_operationResponseTemplatePath);
         var template = Template.Parse(templateText);
 
         var result = await template.RenderAsync(model);
 
+        await WriteFileAsync(filePath, result);
+    }
 
+    private async Task GenerateAppResponseAsync(string outputFolder)
+    {
+        Directory.CreateDirectory(outputFolder);
 
-        await WriteFileAsync(filePath, templateText);
+        var filePath = Path.Combine(outputFolder, $"{Cons.App}{Cons.Response}.cs");
+
+        //if (File.Exists(filePath))
+        //{
+        //    Console.WriteLine($"Skipped: {Cons.App}{Cons.Response}.cs");
+        //    return;
+        //}
+
+        var model = new
+        {
+            file_prefix = Cons.FilePrefix,
+            name_space = Cons.CommonResponseGenerationPath.Replace('\\', '.')
+        };
+        var templateText = await File.ReadAllTextAsync(_appResponseTemplatePath);
+        var template = Template.Parse(templateText);
+
+        var result = await template.RenderAsync(model);
+
+        await WriteFileAsync(filePath, result);
     }
 }
