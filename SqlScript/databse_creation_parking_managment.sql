@@ -10,6 +10,8 @@ CREATE TABLE users
 	role_id INT NOT NULL,
 	user_name VARCHAR(30) NOT NULL UNIQUE,
 	password_hash VARBINARY(64) NOT NULL,
+	email VARCHAR(30) UNIQUE NOT NULL,
+	contact_no VARCHAR(20) NULL,
 	is_active BIT DEFAULT 1
 );
 GO
@@ -91,16 +93,26 @@ ALTER TABLE billings ADD CONSTRAINT FK_billings_payment_methods FOREIGN KEY (pay
 --SP START--
 GO
 CREATE OR ALTER PROCEDURE usp_add_user
-@user_name VARCHAR(30), @password VARCHAR(30), @role_id INT
+@user_name VARCHAR(30), @password VARCHAR(30), @role_id INT, @email VARCHAR(30), @contact_no VARCHAR(20)
 AS
 BEGIN
 	SET NOCOUNT ON;
-	IF NULLIF(TRIM(@user_name), '') IS NULL OR NULLIF(TRIM(@password), '') IS NULL
+	SET XACT_ABORT ON;
+	
+	IF NULLIF(TRIM(@user_name), '') IS NULL
 	BEGIN
-		;THROW 50001, 'Username and password is requird.', 1;
+		;THROW 50001, 'Username is requird.', 1;
 	END
-	INSERT INTO Users (user_name, password_hash,role_id) 
-	VALUES (@user_name, HASHBYTES('SHA2_512', @password),@role_id);
+	IF  NULLIF(TRIM(@password), '') IS NULL
+	BEGIN
+		;THROW 50001, 'Password is requird.', 2;
+	END
+	IF  NULLIF(TRIM(@email), '') IS NULL
+	BEGIN
+		;THROW 50001, 'Email is requird.', 3;
+	END
+	INSERT INTO users (user_name, password_hash,role_id, email, contact_no) 
+	VALUES (@user_name, HASHBYTES('SHA2_512', @password),@role_id, @email, @contact_no);
 	SELECT 'User has been added successfully.' AS Message;
 	RETURN;
 END
