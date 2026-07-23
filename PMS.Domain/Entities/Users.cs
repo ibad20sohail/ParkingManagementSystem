@@ -10,5 +10,7 @@ public partial class Users
     public int RoleId { get; set; }
     public string UserName { get; set; }
     public string PasswordHash { get; set; }
+    public string Email { get; set; }
+    public string? ContactNo { get; set; }
     public bool? IsActive { get; set; }
 }

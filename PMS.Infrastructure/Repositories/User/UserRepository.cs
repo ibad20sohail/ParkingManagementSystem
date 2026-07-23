@@ -26,6 +26,8 @@ public class UserRepository : IUserRepository
         parameters.Add("@user_name", request.UserName);
         parameters.Add("@password", request.Password);
         parameters.Add("@role_id", request.RoleId);
+        parameters.Add("@email", request.Email);
+        parameters.Add("@contact_no", request.ContactNo);
 
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_add_user",

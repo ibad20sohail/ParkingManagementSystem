@@ -1,5 +1,4 @@
-﻿// Login form logic
-const username = document.getElementById('Username');
+﻿const username = document.getElementById('UserName');
 const password = document.getElementById('Password');
 
 const usernameErr = document.getElementById('usernameError');
@@ -15,7 +14,7 @@ function validateUsername() {
         ? ""
         : "Username must be at least 3 characters.";
 
-    return isUserValid;
+    return isUserNameValid;
 }
 
 function validatePassword() {
@@ -62,8 +61,8 @@ function validateLoginForm() {
     return isUsernameValid && isPasswordValid;
 }
 
-user.addEventListener('input', validateUser);
-pass.addEventListener('input', validatePassword);
+username.addEventListener('input', validateUsername);
+password.addEventListener('input', validatePassword);
 
 const loginForm = document.getElementById('loginForm');
 
