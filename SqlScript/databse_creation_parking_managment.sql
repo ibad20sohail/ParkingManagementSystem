@@ -316,7 +316,7 @@ BEGIN
 		@stored_hashed_password = u.password_hash,
 		@stored_role_name = r.name,
 		@stored_role_id = u.role_id
-	FROM users u LEFT JOIN roles r ON u.role_id = r.role_id
+	FROM users u INNER JOIN roles r ON u.role_id = r.role_id
 	WHERE u.user_name = @user_name AND u.is_active = 1;
 
 	IF @stored_user_id IS NULL OR @stored_hashed_password <> HASHBYTES('SHA2_512',@password)
@@ -329,7 +329,6 @@ BEGIN
 		@user_name AS user_name,
 		@stored_role_id AS role_id,
 		@stored_role_name AS role_name;
-	RETURN;
 END
 --SP END--
 
@@ -389,6 +388,5 @@ GO
 EXEC usp_add_role 'admin';
 EXEC usp_add_role 'operator';
 
-EXEC usp_add_user @user_name = 'operator',@password = 'operator', @role_id = 2;
+EXEC usp_add_user @user_name = 'operator',@password = 'Operator@123', @role_id = 2;
 --INSERT END--
-select * from roles;
