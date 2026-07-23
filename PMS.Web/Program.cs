@@ -1,3 +1,4 @@
+using Dapper;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Data.SqlClient;
 using ParkingManagementSystem.ExceptionHandler;
@@ -7,6 +8,9 @@ using PMS.Infrastructure.DependencyInjection;
 using PMS.Infrastructure.Services;
 using Serilog;
 using System.Data;
+
+//Important for repository response mapping
+DefaultTypeMap.MatchNamesWithUnderscores = true;    
 
 var builder = WebApplication.CreateBuilder(args);
 
