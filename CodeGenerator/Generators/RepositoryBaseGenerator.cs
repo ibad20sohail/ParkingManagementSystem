@@ -22,28 +22,22 @@ public abstract class RepositoryBaseGenerator : BaseGenerator
 
     protected object BuildModel(RepositoryMetadata repository)
     {
-        string nameSpaceImplementation = string.Concat(
-            Cons.RepositoryImplementationGenerationPath.Replace('\\', '.'), 
-            ".",
-            repository.EntityName);
-
-        string nameSpaceInterface = string.Concat(
-            Cons.RepositoryInterfaceGenerationPath.Replace('\\','.'),
-            ".",
-            repository.EntityName);
-
+        var response = IsUsingResponseNamespaceValid(repository.EntityName, repository.Methods.Select(x => x.ResponseType).Distinct().ToList())
+                ? $"using {Cons.ResponseGenerationPath.Replace('\\', '.')}.{repository.EntityName};"
+                : string.Empty;
         return new
         {
             interface_name = repository.InterfaceName,
             class_name = repository.ClassName,
             file_prefix = Cons.FilePrefix,
-            name_space_implementation = nameSpaceImplementation,
-            name_space_interface = nameSpaceInterface,
-            using_common = Cons.CommonResponseGenerationPath.Replace('\\', '.'),
-            using_request = Cons.RequestGenerationPath.Replace('\\', '.'),
-            using_response = Cons.ResponseGenerationPath.Replace('\\', '.'),
-            using_dapper = Cons.UsingDapper,
-            using_sytem_data = Cons.UsingSystemData,
+            name_space_implementation = $"{Cons.RepositoryImplementationGenerationPath.Replace('\\', '.')}.{repository.EntityName}",
+            name_space_interface = $"{Cons.RepositoryInterfaceGenerationPath.Replace('\\', '.')}.{repository.EntityName}",
+            using_name_space_interface = $"using {Cons.RepositoryInterfaceGenerationPath.Replace('\\', '.')}.{repository.EntityName};",
+            using_common = $"using {Cons.CommonResponseGenerationPath.Replace('\\', '.')};",
+            using_request = $"using {Cons.RequestGenerationPath.Replace('\\', '.')}.{repository.EntityName};",
+            using_response = response,
+            using_dapper = $"using {Cons.UsingDapper};",
+            using_sytem_data = $"using {Cons.UsingSystemData};",
 
             methods = repository.Methods.Select(m => new
             {
@@ -72,5 +66,20 @@ public abstract class RepositoryBaseGenerator : BaseGenerator
             throw new Exception(template.Messages.ToString());
 
         return await template.RenderAsync(model);
+    }
+
+    private bool IsUsingResponseNamespaceValid(string entityName, List<string> responseTypes)
+    {
+        responseTypes.Remove($"{Cons.Operation}{Cons.Response}");
+        var solutionRoot = SolutionFinder.FindRoot();
+        foreach (var r in responseTypes)
+        {
+            var path = Path.Combine(solutionRoot, Cons.ResponseGenerationPath, entityName, $"{r}.cs");
+
+            if (File.Exists(path))
+                return true;
+        }
+
+        return false;
     }
 }

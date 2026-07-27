@@ -19,4 +19,26 @@ public class NamingHelper
     {
         return word != word.Singularize();
     }
+
+    public static string NormalizeEntityName(string name)
+    {
+        name = name.ToLower();
+
+        if (name.EndsWith("ies"))
+        {
+            return name[..^3] + "y";
+        }
+
+        if (name.EndsWith("ses"))
+        {
+            return name[..^2];
+        }
+
+        if (name.EndsWith("s"))
+        {
+            return name[..^1];
+        }
+
+        return name;
+    }
 }

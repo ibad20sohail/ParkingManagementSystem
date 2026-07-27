@@ -29,7 +29,7 @@ public class ResponseGenerator : BaseGenerator
         var expectedFiles = procedures
            .Where(p => !p.IsOperation)
            .Where(p => p.ResultColumns.Count > 0)
-           .Select(p => $"{p.Action}{p.Entity}{Cons.Response}.cs")
+           .Select(p => $"{p.Action}{p.Entity}{p.Suffix}{Cons.Response}.cs")
            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         await DeleteOrphanFilesAsync(outputFolder, expectedFiles);
@@ -60,15 +60,19 @@ public class ResponseGenerator : BaseGenerator
 
             var model = new
             {
-                name = $"{procedure.Action}{procedure.Entity}{Cons.Response}",
+                name = $"{procedure.Action}{procedure.Entity}{procedure.Suffix}{Cons.Response}",
                 properties = properties,
                 file_prefix = Cons.FilePrefix,
-                name_space = Cons.ResponseGenerationPath.Replace('\\','.')
+                name_space = string.Concat(Cons.ResponseGenerationPath.Replace('\\','.'), ".", procedure.Entity)
             };
 
             var result = await template.RenderAsync(model);
+            
+            var entityFolder = Path.Combine(outputFolder, procedure.Entity);
 
-            var filePath = Path.Combine(outputFolder, $"{model.name}.cs");
+            Directory.CreateDirectory(entityFolder);
+
+            var filePath = Path.Combine(entityFolder, $"{model.name}.cs");
 
             await WriteFileAsync(filePath, result);
         }

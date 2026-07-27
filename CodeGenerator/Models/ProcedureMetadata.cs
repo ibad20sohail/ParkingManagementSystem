@@ -7,6 +7,7 @@ public class ProcedureMetadata
     public string Name { get; set; } = string.Empty;
     public string Action { get; set; } = string.Empty;
     public string Entity { get; set; } = string.Empty;
+    public string Suffix { get; set; } = string.Empty;
     public bool IsOperation => Action == Cons.Add || Action == Cons.Edit || Action == Cons.Delete;
     public bool ReturnsCollection { get; set; }
 

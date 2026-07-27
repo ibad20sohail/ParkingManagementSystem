@@ -16,7 +16,7 @@ public abstract class BaseGenerator
 
             var fileName = Path.GetFileName(file);
 
-            if (!expectedFiles.Contains(fileName) /*&& !fileName.Contains($"{Cons.Operation}{Cons.Response}.cs")*/)
+            if (!expectedFiles.Contains(fileName))
             {
                 File.Delete(file);
                 Console.WriteLine($"Deleted: {fileName}");

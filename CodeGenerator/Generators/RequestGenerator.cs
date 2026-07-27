@@ -5,7 +5,7 @@ using Scriban;
 
 namespace CodeGenerator.Generators;
 
-public class RequestGenerator  : BaseGenerator
+public class RequestGenerator : BaseGenerator
 {
     private readonly string _templatePath;
 
@@ -22,7 +22,7 @@ public class RequestGenerator  : BaseGenerator
 
         var expectedFiles = procedures
             .Where(p => p.Parameters.Count > 0)
-            .Select(p => $"{p.Action}{p.Entity}{Cons.Request}.cs")
+            .Select(p => $"{p.Action}{p.Entity}{p.Suffix}{Cons.Request}.cs")
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         await DeleteOrphanFilesAsync(outputFolder, expectedFiles);
@@ -51,15 +51,19 @@ public class RequestGenerator  : BaseGenerator
 
             var model = new
             {
-                Name = $"{procedure.Action}{procedure.Entity}{Cons.Request}",
+                Name = $"{procedure.Action}{procedure.Entity}{procedure.Suffix}{Cons.Request}",
                 Properties = properties,
                 file_prefix = Cons.FilePrefix,
-                name_space = Cons.RequestGenerationPath.Replace('\\','.')
+                name_space = string.Concat(Cons.RequestGenerationPath.Replace('\\', '.'), ".", procedure.Entity)
             };
 
             var result = await template.RenderAsync(model);
 
-            var filePath = Path.Combine(outputFolder, $"{model.Name}.cs");
+            var entityFolder = Path.Combine(outputFolder, procedure.Entity);
+
+            Directory.CreateDirectory(entityFolder);
+
+            var filePath = Path.Combine(entityFolder, $"{model.Name}.cs");
 
             await WriteFileAsync(filePath, result);
         }

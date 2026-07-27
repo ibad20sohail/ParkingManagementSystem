@@ -1,11 +1,11 @@
 ﻿{{file_prefix}}
 
-using {{using_dapper}};
-using {{using_sytem_data}};
-using {{name_space_interface}};
-using {{using_request}};
-using {{using_response}};
-using {{using_common}};
+{{using_dapper}}
+{{using_sytem_data}}
+{{using_name_space_interface}}
+{{using_request}}
+{{using_response}}
+{{using_common}}
 
 namespace {{name_space_implementation}};
 

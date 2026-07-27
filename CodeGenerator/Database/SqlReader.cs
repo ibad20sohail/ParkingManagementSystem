@@ -275,10 +275,11 @@ namespace CodeGenerator.Database
 
             var result = new List<ProcedureMetadata>();
 
+            var tableNames = await GetTablesAsync();
 
             foreach (var procedure in procedures)
             {
-                var parsed = ProcedureNameParser.Parse(procedure);
+                var parsed = ProcedureNameParser.Parse(procedure, tableNames);
 
                 var parameters = await GetProcedureParametersAsync(procedure);
                 var resultColumns = await GetProcedureResultColumnsAsync(procedure);
@@ -289,7 +290,8 @@ namespace CodeGenerator.Database
                     Entity = parsed.Entity,
                     ReturnsCollection = parsed.Action.Equals("Get", StringComparison.OrdinalIgnoreCase) && NamingHelper.IsPlural(parsed.Entity),
                     Parameters = parameters,
-                    ResultColumns = resultColumns
+                    ResultColumns = resultColumns,
+                    Suffix = parsed.Suffix
                 });
             }
 
