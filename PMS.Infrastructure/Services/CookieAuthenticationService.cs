@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using PMS.Application.IServices;
-using PMS.Application.Models.Responses;
+using PMS.Application.Models.Responses.User;
 using System.Security.Claims;
 
 namespace PMS.Infrastructure.Services
@@ -30,7 +30,7 @@ namespace PMS.Infrastructure.Services
                 ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
             };
 
-            await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,principal,properties);
+            await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, properties);
         }
 
         public async Task SignOutAsync(HttpContext httpContext)

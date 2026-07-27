@@ -1,6 +1,6 @@
-﻿using PMS.Application.Models.Requests;
-using PMS.Application.Models.Responses;
+﻿using PMS.Application.Models.Requests.User;
 using PMS.Application.Models.Responses.Common;
+using PMS.Application.Models.Responses.User;
 
 namespace PMS.Application.IServices
 {

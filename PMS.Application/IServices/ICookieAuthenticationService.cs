@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
-using PMS.Application.Models.Responses;
+using PMS.Application.Models.Responses.User;
 
 namespace PMS.Application.IServices
 {

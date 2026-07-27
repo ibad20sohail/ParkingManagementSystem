@@ -2,9 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using PMS.Application.Constants;
 using PMS.Application.IServices;
-using PMS.Application.Models.Requests;
+using PMS.Application.Models.Requests.User;
 
 namespace PMS.Web.Controllers;
+
 public class AuthController : Controller
 {
     private readonly IAuthService _authService;
