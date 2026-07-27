@@ -5,8 +5,8 @@
 using Dapper;
 using System.Data;
 using PMS.Application.IRepositories.Category;
-using PMS.Application.Models.Requests;
-using PMS.Application.Models.Responses;
+using PMS.Application.Models.Requests.Category;
+
 using PMS.Application.Models.Responses.Common;
 
 namespace PMS.Infrastructure.Repositories.Category;

@@ -5,8 +5,8 @@
 using Dapper;
 using System.Data;
 using PMS.Application.IRepositories.User;
-using PMS.Application.Models.Requests;
-using PMS.Application.Models.Responses;
+using PMS.Application.Models.Requests.User;
+using PMS.Application.Models.Responses.User;
 using PMS.Application.Models.Responses.Common;
 
 namespace PMS.Infrastructure.Repositories.User;
@@ -57,6 +57,17 @@ public class UserRepository : IUserRepository
 
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_edit_user",
+            parameters,
+            commandType: CommandType.StoredProcedure);
+    }
+
+    public async Task<GetUserByUsernameResponse> GetUserByUsernameAsync(GetUserByUsernameRequest request)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@user_name", request.UserName);
+
+        return await _connection.QueryFirstOrDefaultAsync<GetUserByUsernameResponse>(
+            "usp_get_user_by_username",
             parameters,
             commandType: CommandType.StoredProcedure);
     }

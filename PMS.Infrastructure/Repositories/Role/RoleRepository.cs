@@ -5,8 +5,8 @@
 using Dapper;
 using System.Data;
 using PMS.Application.IRepositories.Role;
-using PMS.Application.Models.Requests;
-using PMS.Application.Models.Responses;
+using PMS.Application.Models.Requests.Role;
+
 using PMS.Application.Models.Responses.Common;
 
 namespace PMS.Infrastructure.Repositories.Role;
