@@ -27,7 +27,7 @@ public class ResponseGenerator : BaseGenerator
         Directory.CreateDirectory(outputFolder);
 
         var expectedFiles = procedures
-           .Where(p => !p.IsOperation)
+           .Where(p => !p.UsesOperationResponse)
            .Where(p => p.ResultColumns.Count > 0)
            .Select(p => $"{p.Action}{p.Entity}{p.Suffix}{Cons.Response}.cs")
            .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -44,8 +44,7 @@ public class ResponseGenerator : BaseGenerator
 
         foreach (var procedure in procedures)
         {
-            // Add/Edit/Delete use OperationResponse
-            if (procedure.IsOperation)
+            if (procedure.UsesOperationResponse)
                 continue;
 
             // only generate response classes when procedure returns data

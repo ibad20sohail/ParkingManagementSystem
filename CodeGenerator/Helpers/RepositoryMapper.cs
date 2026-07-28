@@ -21,7 +21,7 @@ public static class RepositoryMapper
 
 
         var responseType =
-            procedure.IsOperation
+            procedure.UsesOperationResponse
             ?
             $"{Cons.Operation}{Cons.Response}"
             :
