@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PMS.Application.Constants;
+using PMS.Application.Helper;
 using PMS.Application.IServices;
 using PMS.Application.Models.Requests.User;
+using System.Security.Claims;
 
 namespace PMS.Web.Controllers;
 
@@ -84,6 +86,25 @@ public class AuthController : Controller
             return RedirectToAction("ResetPassword", request);
         }
         TempData[Cons.Success] = $"{result.Model.Message}";
+
+        return RedirectToAction("Login");
+    }
+
+    [Authorize]
+    [HttpPost]
+    public async Task<IActionResult> Logout()
+    {
+        var claims = User.GetUserInformation();
+
+        var result = await _authService.LogoutAsync(new LogoutUserRequest { UserId = claims.UserId});
+        if (!result.IsSuccess)
+        {
+            TempData[Cons.Error] = result.Message;
+            return RedirectToAction("Index","Home");
+        }
+        
+        TempData[Cons.Success] = $"{result.Model.Message}";
+        await _cookieAuthenticationService.SignOutAsync(HttpContext);
 
         return RedirectToAction("Login");
     }

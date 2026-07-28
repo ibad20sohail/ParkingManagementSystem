@@ -9,5 +9,6 @@ namespace PMS.Application.IServices
         Task<AppResponse<LoginUserResponse>> LoginAsync(LoginUserRequest request);
         Task<AppResponse<GetUserByUsernameResponse>> ForgetPasswordAsync(GetUserByUsernameRequest request);
         Task<AppResponse<OperationResponse>> ResetPasswordAsync(ResetUserPasswordRequest request);
+        Task<AppResponse<OperationResponse>> LogoutAsync(LogoutUserRequest request);
     }
 }

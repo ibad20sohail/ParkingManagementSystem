@@ -1,14 +1,21 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using PMS.Application.IServices;
 using PMS.Application.Models.Responses.User;
+using PMS.Application.Settings;
 using System.Security.Claims;
 
 namespace PMS.Infrastructure.Services
 {
     public class CookieAuthenticationService : ICookieAuthenticationService
     {
+        private readonly CookieSettings _settings;
+        public CookieAuthenticationService(IOptions<ApplicationParameters> settings)
+        {
+            _settings = settings.Value.CookieSettings;
+        }
         public async Task SignInAsync(HttpContext httpContext, LoginUserResponse user)
         {
             var claims = new List<Claim>
@@ -27,7 +34,7 @@ namespace PMS.Infrastructure.Services
             {
                 IsPersistent = false,
                 AllowRefresh = true,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(_settings.Expiration)
             };
 
             await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, properties);

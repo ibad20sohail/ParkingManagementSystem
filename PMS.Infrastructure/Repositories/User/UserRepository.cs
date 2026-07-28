@@ -84,6 +84,17 @@ public class UserRepository : IUserRepository
             commandType: CommandType.StoredProcedure);
     }
 
+    public async Task<OperationResponse> LogoutUserAsync(LogoutUserRequest request)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@user_id", request.UserId);
+
+        return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+            "usp_logout_user",
+            parameters,
+            commandType: CommandType.StoredProcedure);
+    }
+
     public async Task<OperationResponse> ResetUserPasswordAsync(ResetUserPasswordRequest request)
     {
         var parameters = new DynamicParameters();

@@ -67,6 +67,20 @@ namespace PMS.Infrastructure.Services
             }
         }
 
+        public async Task<AppResponse<OperationResponse>> LogoutAsync(LogoutUserRequest request)
+        {
+            try
+            {
+                var result = await _userRepository.LogoutUserAsync(request);
+
+                return AppResponse<OperationResponse>.Success(result);
+            }
+            catch (SqlException ex)
+            {
+                return AppResponse<OperationResponse>.Failure(ex.Message);
+            }
+        }
+
         public async Task<AppResponse<OperationResponse>> ResetPasswordAsync(ResetUserPasswordRequest request)
         {
             try

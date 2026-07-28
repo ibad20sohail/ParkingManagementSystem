@@ -1,5 +1,6 @@
 using Dapper;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using ParkingManagementSystem.ExceptionHandler;
 using ParkingManagementSystem.Filters;
@@ -44,6 +45,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 // Add services to the container.
 builder.Services.AddControllersWithViews(options =>
 {
+    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
     options.Filters.Add<GlobalLoggingFilter>();
 });
 
