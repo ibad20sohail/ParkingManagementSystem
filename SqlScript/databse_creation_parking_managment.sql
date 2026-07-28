@@ -15,6 +15,14 @@ CREATE TABLE users
 	is_active BIT DEFAULT 1
 );
 GO
+CREATE TABLE login_logs
+(
+	login_log_id INT PRIMARY KEY IDENTITY(1,1),
+	user_id INT NOT NULL,
+	login_at DATETIME2 NOT NULL DEFAULT(GETUTCDATE()),
+	logout_at DATETIME2 NULL
+);
+GO
 CREATE TABLE reset_password_links
 (
 	reset_password_links_id INT PRIMARY KEY IDENTITY(1,1),
@@ -89,6 +97,8 @@ GO
 ALTER TABLE users ADD CONSTRAINT FK_users_roles FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE NO ACTION;
 GO
 ALTER TABLE reset_password_links ADD CONSTRAINT FK_reset_password_links_users FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
+GO
+ALTER TABLE login_logs ADD CONSTRAINT FK_login_logs_users FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
 GO
 ALTER TABLE tickets ADD CONSTRAINT FK_tickets_categories FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE NO ACTION;
 GO
@@ -327,16 +337,17 @@ BEGIN
 	SET NOCOUNT ON;
 	SET XACT_ABORT ON; 
 
-	IF NULLIF(@user_name,'') IS NULL OR NULLIF(@password,'') IS NULL
-	BEGIN
-		;THROW 50001, 'Username and password is required.',1;
-	END
-
 	DECLARE @stored_user_id INT;
 	DECLARE @stored_hashed_password VARBINARY(64);
 	DECLARE @stored_role_name VARCHAR(20);
 	DECLARE @stored_role_id INT;
 	DECLARE @stored_email VARCHAR(30);
+	DECLARE @today_date DATE = CAST(GETUTCDATE() AS DATE);
+
+	IF NULLIF(@user_name,'') IS NULL OR NULLIF(@password,'') IS NULL
+	BEGIN
+		;THROW 50001, 'Username and password is required.',1;
+	END
 
 	SELECT 
 		@stored_user_id = u.user_id,
@@ -351,12 +362,37 @@ BEGIN
 	BEGIN
 		;THROW 50001, 'Invalid credentials',2;
 	END
-
+	
+	IF NOT EXISTS (SELECT 1 FROM login_logs 
+		WHERE user_id = @stored_user_id AND
+		CAST(login_at AS DATE) = @today_date)
+	BEGIN
+		INSERT INTO login_logs (user_id) VALUES (@stored_user_id);
+	END
 	SELECT 
 		@stored_user_id AS user_id,
 		@user_name AS user_name,
 		@stored_role_id AS role_id,
 		@stored_role_name AS role_name;
+END
+GO
+CREATE OR ALTER PROCEDURE usp_logout_user
+@user_id INT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SET XACT_ABORT ON;
+
+	;WITH LatestSession AS (
+        SELECT TOP 1 logout_at
+        FROM login_logs
+        WHERE user_id = @user_id AND logout_at IS NULL
+        ORDER BY login_at DESC
+    )
+    UPDATE LatestSession 
+    SET logout_at = GETUTCDATE();
+
+	SELECT N'Bye 👋' AS message;
 END
 GO
 CREATE OR ALTER PROCEDURE usp_get_user_by_username
