@@ -84,4 +84,17 @@ public class UserRepository : IUserRepository
             commandType: CommandType.StoredProcedure);
     }
 
+    public async Task<OperationResponse> ResetUserPasswordAsync(ResetUserPasswordRequest request)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@identifier", request.Identifier);
+        parameters.Add("@new_password", request.NewPassword);
+        parameters.Add("@confirm_password", request.ConfirmPassword);
+
+        return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
+            "usp_reset_user_password",
+            parameters,
+            commandType: CommandType.StoredProcedure);
+    }
+
 }

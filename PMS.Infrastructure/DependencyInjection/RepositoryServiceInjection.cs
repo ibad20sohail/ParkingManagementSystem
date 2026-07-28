@@ -5,10 +5,12 @@
 using Microsoft.Extensions.DependencyInjection;
 using PMS.Application.IRepositories.Category;
 using PMS.Application.IRepositories.ParkingSpace;
+using PMS.Application.IRepositories.ResetPasswordLink;
 using PMS.Application.IRepositories.Role;
 using PMS.Application.IRepositories.User;
 using PMS.Infrastructure.Repositories.Category;
 using PMS.Infrastructure.Repositories.ParkingSpace;
+using PMS.Infrastructure.Repositories.ResetPasswordLink;
 using PMS.Infrastructure.Repositories.Role;
 using PMS.Infrastructure.Repositories.User;
 
@@ -20,6 +22,7 @@ public static class RepositoryServiceInjection
     {
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IParkingSpaceRepository, ParkingSpaceRepository>();
+        services.AddScoped<IResetPasswordLinkRepository, ResetPasswordLinkRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
 

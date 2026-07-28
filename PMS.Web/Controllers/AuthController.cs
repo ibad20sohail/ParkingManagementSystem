@@ -48,21 +48,43 @@ public class AuthController : Controller
     }
     [AllowAnonymous]
     [HttpPost]
-    public async Task<IActionResult> ForgetPassword(LoginUserRequest request)
+    public async Task<IActionResult> ForgetPassword(GetUserByUsernameRequest request)
     {
         if (!ModelState.IsValid)
             return View();
 
-        var result = await _authService.LoginAsync(request);
+        var result = await _authService.ForgetPasswordAsync(request);
 
         if (!result.IsSuccess)
         {
             TempData[Cons.Error] = result.Message;
             return View(request);
         }
-        TempData[Cons.Success] = $"Welcome to PMS - {result.Model.UserName}.";
-        await _cookieAuthenticationService.SignInAsync(HttpContext, result.Model);
+        TempData[Cons.Success] = $"Password reset email has been sent to {result.Model.Email}. Please go to your mail to continue.";
 
-        return RedirectToAction("Index", "Home");
+        return View(request);
+    }
+    [AllowAnonymous]
+    [HttpGet]
+    public async Task<IActionResult> ResetPassword(ResetUserPasswordRequest request)
+    {
+        return View(request);
+    }
+    [AllowAnonymous]
+    [HttpPost]
+    public async Task<IActionResult> PostResetPassword(ResetUserPasswordRequest request)
+    {
+        if (!ModelState.IsValid)
+            return RedirectToAction("ResetPassword",request);
+
+        var result = await _authService.ResetPasswordAsync(request);
+        if (!result.IsSuccess)
+        {
+            TempData[Cons.Error] = result.Message;
+            return RedirectToAction("ResetPassword", request);
+        }
+        TempData[Cons.Success] = $"{result.Model.Message}";
+
+        return RedirectToAction("Login");
     }
 }

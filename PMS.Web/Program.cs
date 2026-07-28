@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Data.SqlClient;
 using ParkingManagementSystem.ExceptionHandler;
 using ParkingManagementSystem.Filters;
+using PMS.Application.Constants;
 using PMS.Application.IServices;
+using PMS.Application.Settings;
 using PMS.Infrastructure.DependencyInjection;
 using PMS.Infrastructure.Services;
 using Serilog;
@@ -18,18 +20,22 @@ var builder = WebApplication.CreateBuilder(args);
 Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger();
 builder.Host.UseSerilog();
 
+//App parameters configuration
+builder.Services.Configure<ApplicationParameters>(builder.Configuration.GetSection(Cons.AppPara));
+var appPara = builder.Configuration.GetSection(Cons.AppPara).Get<ApplicationParameters>()!;
+
 //Cookie authentication configuration
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/Auth/Login";
-        options.LogoutPath = "/Auth/Logout";
-        options.AccessDeniedPath = "/Auth/AccessDenied";
+        options.LoginPath = appPara.CookieSettings.LoginPath;
+        options.LogoutPath = appPara.CookieSettings.LogoutPath;
+        options.AccessDeniedPath = appPara.CookieSettings.AccessDeniedPath;
 
-        options.Cookie.Name = "PMS.Auth";
+        options.Cookie.Name = appPara.CookieSettings.Name;
 
-        options.ExpireTimeSpan = TimeSpan.FromHours(12);
-        options.SlidingExpiration = true;
+        options.ExpireTimeSpan = TimeSpan.FromHours(appPara.CookieSettings.Expiration);
+        options.SlidingExpiration = appPara.CookieSettings.SlidingExpiration;
 
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         options.Cookie.SameSite = SameSiteMode.Lax;
@@ -49,7 +55,9 @@ builder.Services.AddRepositories();
 
 //Services Injection
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<ICookieAuthenticationService, CookieAuthenticationService>();
+
+builder.Services.AddTransient<ICookieAuthenticationService, CookieAuthenticationService>();
+builder.Services.AddTransient<IEmailService, EmailService>();
 
 //Global exception handler
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

@@ -8,5 +8,10 @@
         public const string Info = "Info";
 
         public const string Title = "Title";
+
+        public const string AppPara = "ApplicationParameters";
+
+        public const string ForgetPasswordEmailTemplateName = "ForgetPassword";
+
     }
 }

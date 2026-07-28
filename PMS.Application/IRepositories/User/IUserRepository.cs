@@ -20,4 +20,6 @@ public interface IUserRepository
 
     Task<LoginUserResponse> LoginUserAsync(LoginUserRequest request);
 
+    Task<OperationResponse> ResetUserPasswordAsync(ResetUserPasswordRequest request);
+
 }

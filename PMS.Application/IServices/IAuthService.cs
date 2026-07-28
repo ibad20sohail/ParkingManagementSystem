@@ -7,5 +7,7 @@ namespace PMS.Application.IServices
     public interface IAuthService
     {
         Task<AppResponse<LoginUserResponse>> LoginAsync(LoginUserRequest request);
+        Task<AppResponse<GetUserByUsernameResponse>> ForgetPasswordAsync(GetUserByUsernameRequest request);
+        Task<AppResponse<OperationResponse>> ResetPasswordAsync(ResetUserPasswordRequest request);
     }
 }
