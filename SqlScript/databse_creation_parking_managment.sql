@@ -15,6 +15,17 @@ CREATE TABLE users
 	is_active BIT DEFAULT 1
 );
 GO
+CREATE TABLE reset_password_links
+(
+	reset_password_links_id INT PRIMARY KEY IDENTITY(1,1),
+	user_id INT NOT NULL,
+	link VARCHAR(200) NOT NULL,
+	identifier UNIQUEIDENTIFIER NOT NULL,
+	has_used BIT DEFAULT(0),
+	expire_at DATETIME2 NOT NULL,
+	created_at DATETIME2 NOT NULL DEFAULT(GETUTCDATE())
+);
+GO
 CREATE TABLE roles
 (
 	role_id INT PRIMARY KEY IDENTITY(1,1),
@@ -76,6 +87,8 @@ CREATE TABLE payment_methods
 --FOREIGN KEY START--
 GO
 ALTER TABLE users ADD CONSTRAINT FK_users_roles FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE NO ACTION;
+GO
+ALTER TABLE reset_password_links ADD CONSTRAINT FK_reset_password_links_users FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
 GO
 ALTER TABLE tickets ADD CONSTRAINT FK_tickets_categories FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE NO ACTION;
 GO
@@ -357,21 +370,98 @@ BEGIN
 	BEGIN
 		;THROW 50001, 'Username is required.',1;
 	END
-
-	DECLARE @stored_email VARCHAR(30);
 	
-	SELECT @stored_email = email FROM users WHERE user_name = @user_name;
+	SELECT u.user_id, u.user_name, u.email, u.contact_no, u.role_id, r.name AS role_name
+	FROM users u INNER JOIN roles r ON u.role_id = r.role_id
+	WHERE user_name = @user_name;
+	
 	IF @@ROWCOUNT = 0
 	BEGIN
-		;THROW 50001, 'Invalid credentials.',2;
+		;THROW 50001, 'Invalid Username.',2;
 	END
-	IF NULLIF(TRIM(@stored_email),'') IS NULL
+END
+GO
+CREATE OR ALTER PROCEDURE usp_generate_reset_password_link
+@user_id INT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SET XACT_ABORT ON;
+
+	IF NOT EXISTS (SELECT 1 FROM users WHERE user_id = @user_id AND is_active = 1)
 	BEGIN
-		DECLARE @error_message VARCHAR(30) = FORMATMESSAGE('Email of "%s" not found', @user_name)
-		;THROW 50001, @error_message,3;
+		;THROW 50001, 'User not found.',1;
 	END
-	SELECT
-		@stored_email AS email;
+	
+	DECLARE @identifier UNIQUEIDENTIFIER = NEWID();
+	DECLARE @generated_link VARCHAR(200) = CONCAT('/Auth/ResetPassword?Identifier=',@identifier);
+
+	INSERT INTO reset_password_links (user_id, expire_at, link, identifier)
+	OUTPUT inserted.link AS generated_link, DATEDIFF(MINUTE, GETUTCDATE(), inserted.expire_at) AS expire_in
+	VALUES (
+	@user_id, 
+	DATEADD(MINUTE,30,GETUTCDATE()),
+	@generated_link,
+	@identifier);
+
+	SELECT 'Reset password link has been generated' AS message;
+
+END
+GO
+CREATE OR ALTER PROCEDURE usp_reset_user_password
+@identifier UNIQUEIDENTIFIER, @new_password VARCHAR(500), @confirm_password VARCHAR(300)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SET XACT_ABORT ON;
+
+	DECLARE @expire_at DATETIME2;
+	DECLARE @id INT;
+	DECLARE @has_used BIT;
+	DECLARE @user_id INT;
+
+	SELECT TOP(1) 
+		@expire_at = r.expire_at,
+		@id = r.reset_password_links_id,
+		@has_used = r.has_used,
+		@user_id = r.user_id
+	FROM reset_password_links r
+	WHERE r.identifier = @identifier ORDER BY reset_password_links_id DESC;
+	
+	IF NULLIF(@id, '') IS NULL
+	BEGIN
+		;THROW 50001, 'Invalid link.',1;
+	END
+
+	IF (@has_used = 1)
+	BEGIN
+		;THROW 50001, 'This link has already used.',2;
+	END
+
+	IF (@expire_at < GETUTCDATE())
+	BEGIN
+		;THROW 50001, 'This link has been expired.',3;
+	END
+
+	IF NULLIF(@user_id, '') IS NULL
+	BEGIN
+		;THROW 50001, 'User Id is required.', 1;
+	END
+
+	IF(@new_password <> @confirm_password)
+	BEGIN
+		;THROW 50001, 'Confirm password does not match with new password.', 2; 
+	END
+	
+	UPDATE reset_password_links SET
+		has_used = 1
+	WHERE reset_password_links_id = @id;
+
+	UPDATE users SET
+		password_hash = HASHBYTES('SHA2_512',@new_password)
+	WHERE user_id = @user_id;
+
+	SELECT 'Password has been reseted successfully' AS message;
 END
 --SP END--
 
