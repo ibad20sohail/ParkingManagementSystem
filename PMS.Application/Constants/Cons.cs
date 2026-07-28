@@ -13,5 +13,8 @@
 
         public const string ForgetPasswordEmailTemplateName = "ForgetPassword";
 
+        public const string Admin = "admin";
+        public const string Operator = "operator";
+
     }
 }
