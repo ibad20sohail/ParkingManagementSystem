@@ -10,5 +10,6 @@ public class RepositoryMethodMetadata
 
     public string ProcedureName { get; set; } = string.Empty;
     public bool ReturnsCollection { get; set; }
+    public bool HasResponse { get; set; }
     public List<RepositoryParameterMetadata> Parameters { get; set; } = new();
 }

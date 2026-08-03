@@ -62,7 +62,7 @@ public class AuthController : Controller
             TempData[Cons.Error] = result.Message;
             return View(request);
         }
-        TempData[Cons.Success] = $"Password reset email has been sent to {result.Model.Email}. Please go to your mail to continue.";
+        TempData[Cons.Success] = result.Model.Message;
 
         return View(request);
     }

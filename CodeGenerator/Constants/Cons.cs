@@ -12,6 +12,7 @@ public static class Cons
 
     public const string Request = "Request";
     public const string Response = "Response";
+    public const string Void = "void";
     public const string Operation = "Operation";
     public const string App = "App";
     public const string Repository = "Repository";
@@ -41,4 +42,5 @@ public static class Cons
     public const string UsingDapper = "Dapper";
     public const string UsingSystemData = "System.Data";
     public const string UsingDependencyInjection = "Microsoft.Extensions.DependencyInjection";
+
 }

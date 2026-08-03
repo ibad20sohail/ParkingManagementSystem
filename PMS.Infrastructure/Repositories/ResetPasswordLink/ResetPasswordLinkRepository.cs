@@ -6,7 +6,7 @@ using Dapper;
 using System.Data;
 using PMS.Application.IRepositories.ResetPasswordLink;
 using PMS.Application.Models.Requests.ResetPasswordLink;
-using PMS.Application.Models.Responses.ResetPasswordLink;
+
 using PMS.Application.Models.Responses.Common;
 
 namespace PMS.Infrastructure.Repositories.ResetPasswordLink;
@@ -20,15 +20,21 @@ public class ResetPasswordLinkRepository : IResetPasswordLinkRepository
         _connection = connection;
     }
 
-    public async Task<GenerateResetPasswordLinkResponse> GenerateResetPasswordLinkAsync(GenerateResetPasswordLinkRequest request)
+
+    public async Task<OperationResponse> GenerateResetPasswordLinkAsync(GenerateResetPasswordLinkRequest request)
     {
         var parameters = new DynamicParameters();
-        parameters.Add("@user_id", request.UserId);
 
-        return await _connection.QueryFirstOrDefaultAsync<GenerateResetPasswordLinkResponse>(
+        parameters.Add("@user_name", request.UserName);
+        parameters.Add("@base_url", request.BaseUrl);
+
+
+        return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_generate_reset_password_link",
             parameters,
             commandType: CommandType.StoredProcedure);
+
     }
+
 
 }

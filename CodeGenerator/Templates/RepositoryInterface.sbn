@@ -9,10 +9,11 @@ namespace {{name_space_interface}};
 public interface {{interface_name}}
 {
 {{~ for method in methods ~}}
+
 {{~ if method.request_type ~}}
-    Task<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}> {{method.name}}({{method.request_type}} request);
+    Task{{ if method.has_response }}<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}>{{ end }} {{method.name}}({{method.request_type}} request);
 {{~ else ~}}
-    Task<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}> {{method.name}}();
+    Task{{ if method.has_response }}<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}>{{ end }} {{method.name}}();
 {{~ end ~}}
 
 {{~ end ~}}

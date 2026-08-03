@@ -20,38 +20,53 @@ public class RoleRepository : IRoleRepository
         _connection = connection;
     }
 
+
     public async Task<OperationResponse> AddRoleAsync(AddRoleRequest request)
     {
         var parameters = new DynamicParameters();
+
         parameters.Add("@name", request.Name);
+
 
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_add_role",
             parameters,
             commandType: CommandType.StoredProcedure);
+
     }
+
+
 
     public async Task<OperationResponse> DeleteRoleAsync(DeleteRoleRequest request)
     {
         var parameters = new DynamicParameters();
+
         parameters.Add("@role_id", request.RoleId);
+
 
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_delete_role",
             parameters,
             commandType: CommandType.StoredProcedure);
+
     }
+
+
 
     public async Task<OperationResponse> EditRoleAsync(EditRoleRequest request)
     {
         var parameters = new DynamicParameters();
+
         parameters.Add("@role_id", request.RoleId);
         parameters.Add("@name", request.Name);
+
 
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_edit_role",
             parameters,
             commandType: CommandType.StoredProcedure);
+
     }
+
 
 }

@@ -10,9 +10,12 @@ namespace PMS.Application.IRepositories.Role;
 
 public interface IRoleRepository
 {
+
     Task<OperationResponse> AddRoleAsync(AddRoleRequest request);
 
+
     Task<OperationResponse> DeleteRoleAsync(DeleteRoleRequest request);
+
 
     Task<OperationResponse> EditRoleAsync(EditRoleRequest request);
 

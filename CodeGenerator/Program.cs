@@ -44,3 +44,15 @@ var repoDIGenerator = new DependencyInjectionGenerator(repoDIPath);
 var outputForDI = Path.Combine(solutionRoot, Cons.DependencyInjectionGenerationPath);
 await repoDIGenerator.GenerateAsync(procedures, outputForDI);
 
+
+//foreach (var procedure in procedures)
+//{
+//    Console.WriteLine($"\n{procedure.Name}");
+
+//    foreach (var column in procedure.ResultColumns)
+//    {
+//        Console.WriteLine($"{column.Name} | {column.SqlType}");
+//    }
+
+//    Console.WriteLine($"UsesOperationResponse: {procedure.UsesOperationResponse}");
+//}

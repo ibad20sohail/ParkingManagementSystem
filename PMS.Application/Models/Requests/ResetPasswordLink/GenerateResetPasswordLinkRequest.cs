@@ -6,5 +6,6 @@ namespace PMS.Application.Models.Requests.ResetPasswordLink;
 
 public class GenerateResetPasswordLinkRequest
 {
-    public int UserId { get; set; }
+    public string UserName { get; set; }
+    public string BaseUrl { get; set; }
 }

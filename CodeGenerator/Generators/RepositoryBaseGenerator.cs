@@ -46,6 +46,7 @@ public abstract class RepositoryBaseGenerator : BaseGenerator
                 response_type = m.ResponseType,
                 procedure_name = m.ProcedureName,
                 returns_collection = m.ReturnsCollection,
+                has_response = m.HasResponse,
                 parameters = m.Parameters.Select(p => new
                 {
                     sql_name = p.Name,

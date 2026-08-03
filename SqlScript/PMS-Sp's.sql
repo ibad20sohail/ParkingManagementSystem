@@ -1,119 +1,3 @@
-CREATE DATABASE parking_management_system;
-GO
-USE parking_management_system;
-GO
---TABLES START--
-GO
-CREATE TABLE users
-(
-	user_id INT PRIMARY KEY IDENTITY(1,1),
-	role_id INT NOT NULL,
-	user_name VARCHAR(30) NOT NULL UNIQUE,
-	password_hash VARBINARY(64) NOT NULL,
-	email VARCHAR(30) UNIQUE NOT NULL,
-	contact_no VARCHAR(20) NULL,
-	is_active BIT DEFAULT 1
-);
-GO
-CREATE TABLE login_logs
-(
-	login_log_id INT PRIMARY KEY IDENTITY(1,1),
-	user_id INT NOT NULL,
-	login_at DATETIME2 NOT NULL DEFAULT(GETUTCDATE()),
-	logout_at DATETIME2 NULL
-);
-GO
-CREATE TABLE reset_password_links
-(
-	reset_password_links_id INT PRIMARY KEY IDENTITY(1,1),
-	user_id INT NOT NULL,
-	link VARCHAR(200) NOT NULL,
-	identifier UNIQUEIDENTIFIER NOT NULL,
-	has_used BIT DEFAULT(0),
-	expire_at DATETIME2 NOT NULL,
-	created_at DATETIME2 NOT NULL DEFAULT(GETUTCDATE())
-);
-GO
-CREATE TABLE roles
-(
-	role_id INT PRIMARY KEY IDENTITY(1,1),
-	name VARCHAR(20) NOT NULL UNIQUE
-);
-GO
-CREATE TABLE tickets
-(
-	ticket_id INT PRIMARY KEY IDENTITY(1,1),
-	license_no VARCHAR(30) NOT NULL,
-	driver_name VARCHAR(30) NULL,
-	company VARCHAR(20) NULL,
-	model_no VARCHAR(30) NULL,
-	issued_at DATETIME2 NOT NULL DEFAULT(GETUTCDATE()),
-	expires_at DATETIME2 NULL,
-	is_used BIT DEFAULT 0,
-
-	category_id INT NOT NULL,
-	parking_space_Id INT NULL,
-	user_id INT NOT NULL
-);
-GO
-CREATE TABLE categories
-(
-	category_id INT PRIMARY KEY IDENTITY(1,1),
-	name VARCHAR(30) NOT NULL UNIQUE
-);
-GO
-CREATE TABLE parking_spaces
-(
-	parking_space_id INT PRIMARY KEY IDENTITY(1,1),
-	floor VARCHAR(20) NULL,
-	code VARCHAR(10) NOT NULL UNIQUE,
-	parking_space_status_id INT NOT NULL
-);
-GO
-CREATE TABLE parking_space_statuses
-(
-	parking_space_status_id INT PRIMARY KEY IDENTITY(1,1),
-	name VARCHAR(20) NOT NULL UNIQUE
-);
-GO
-CREATE TABLE billings
-(
-	billing_id INT PRIMARY KEY IDENTITY(1,1),
-	ticket_id INT NOT NULL,
-	payment_method_id INT NOT NUll,
-	amount DECIMAL(10,2) NULL,
-	created_at DATETIME2 NOT NULL DEFAULT(GETUTCDATE())
-);
-GO
-CREATE TABLE payment_methods
-(
-	payment_method_id INT PRIMARY KEY IDENTITY(1,1),
-	payment_type VARCHAR(30) NOT NULL UNIQUE,
-);
---TABLES END--
-
---FOREIGN KEY START--
-GO
-ALTER TABLE users ADD CONSTRAINT FK_users_roles FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE NO ACTION;
-GO
-ALTER TABLE reset_password_links ADD CONSTRAINT FK_reset_password_links_users FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
-GO
-ALTER TABLE login_logs ADD CONSTRAINT FK_login_logs_users FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
-GO
-ALTER TABLE tickets ADD CONSTRAINT FK_tickets_categories FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE NO ACTION;
-GO
-ALTER TABLE tickets ADD CONSTRAINT FK_tickets_parking_spaces FOREIGN KEY (parking_space_id) REFERENCES parking_spaces(parking_space_id) ON DELETE SET NULL;
-GO
-ALTER TABLE tickets ADD CONSTRAINT FK_tickets_users FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE NO ACTION;
-GO
-ALTER TABLE parking_spaces ADD CONSTRAINT FK_parking_spaces_parking_space_statuses FOREIGN KEY (parking_space_status_id) REFERENCES parking_space_statuses(parking_space_status_Id) ON DELETE NO ACTION;
-GO
-ALTER TABLE billings ADD CONSTRAINT FK_billings_tickets FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id) ON DELETE NO ACTION;
-GO
-ALTER TABLE billings ADD CONSTRAINT FK_billings_payment_methods FOREIGN KEY (payment_method_id) REFERENCES payment_methods(payment_method_id) ON DELETE NO ACTION;
---FOREIGN KEY END--
-
---SP START--
 GO
 CREATE OR ALTER PROCEDURE usp_add_user
 @user_name VARCHAR(30), @password VARCHAR(30), @role_id INT, @email VARCHAR(30), @contact_no VARCHAR(20) = NULL
@@ -417,31 +301,88 @@ BEGIN
 	END
 END
 GO
-CREATE OR ALTER PROCEDURE usp_generate_reset_password_link
+CREATE OR ALTER PROCEDURE usp_get_user_by_id
 @user_id INT
 AS
 BEGIN
 	SET NOCOUNT ON;
 	SET XACT_ABORT ON;
 
-	IF NOT EXISTS (SELECT 1 FROM users WHERE user_id = @user_id AND is_active = 1)
+	IF @user_id IS NULL OR @user_id <= 0
 	BEGIN
-		;THROW 50001, 'User not found.',1;
+		;THROW 50001, 'User id is required.',1;
 	END
 	
-	DECLARE @identifier UNIQUEIDENTIFIER = NEWID();
-	DECLARE @generated_link VARCHAR(200) = CONCAT('/Auth/ResetPassword?Identifier=',@identifier);
+	SELECT u.user_id, u.user_name, u.email, u.contact_no, u.role_id, r.name AS role_name
+	FROM users u INNER JOIN roles r ON u.role_id = r.role_id
+	WHERE user_name = @user_id;
+	
+	IF @@ROWCOUNT = 0
+	BEGIN
+		;THROW 50001, 'Invalid User id.',2;
+	END
+END
+GO
+CREATE OR ALTER PROCEDURE usp_generate_reset_password_link
+-- @generator-response OperationResponse
+	@user_name VARCHAR(30), 
+    @base_url VARCHAR(30) 
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
 
-	INSERT INTO reset_password_links (user_id, expire_at, link, identifier)
-	OUTPUT inserted.link AS generated_link, DATEDIFF(MINUTE, GETUTCDATE(), inserted.expire_at) AS expire_in
-	VALUES (
-	@user_id, 
-	DATEADD(MINUTE,30,GETUTCDATE()),
-	@generated_link,
-	@identifier);
+    DECLARE @user_id INT;
+    DECLARE @user_email VARCHAR(30);
+    DECLARE @identifier UNIQUEIDENTIFIER = NEWID();
+    DECLARE @generated_link VARCHAR(200);
+    DECLARE @expire_minutes INT = 30;
+    DECLARE @expire_at DATETIME2(0) = DATEADD(MINUTE, @expire_minutes, GETUTCDATE());
+    DECLARE @email_subject NVARCHAR(200);
+    DECLARE @email_body NVARCHAR(MAX);
+	DECLARE @template_id INT;
 
-	SELECT 'Reset password link has been generated' AS message;
+    SELECT @user_id = user_id, @user_email = email FROM users WHERE user_name = @user_name AND is_active = 1;
 
+    IF @user_id IS NULL OR @user_id <= 0
+    BEGIN
+        ;THROW 51000, 'User account is invalid or does not exist.', 1;
+    END
+
+    SET @base_url = CASE WHEN RIGHT(@base_url, 1) = '/' THEN LEFT(@base_url, LEN(@base_url) - 1) ELSE @base_url END;
+    SET @generated_link = CONCAT(@base_url, '/Auth/ResetPassword?Identifier=', CAST(@identifier AS VARCHAR(36)));
+
+    BEGIN TRANSACTION;
+    BEGIN TRY
+        
+        INSERT INTO reset_password_links (user_id, expire_at, link, identifier)
+        VALUES (@user_id, @expire_at, @generated_link, @identifier);
+		
+		SELECT
+			@template_id = @template_id,
+            @email_subject = subject, 
+            @email_body = body 
+        FROM templates 
+        WHERE is_active = 1 AND name = 'ResetPassword';
+
+        IF NULLIF(@email_body, '') IS NULL OR NULLIF(@email_subject, '') IS NULL
+        BEGIN
+            ;THROW 51001, 'Email notification dispatch failed: Missing communication asset template.', 1;
+        END
+
+        SET @email_body = REPLACE(REPLACE(REPLACE(@email_body, '{{user_name}}', @user_name), '{{reset_link}}', @generated_link), '{{expire_in}}', CAST(@expire_minutes AS VARCHAR(10)));        
+
+		EXEC usp_send_email @user_email, @user_id, @template_id, @email_subject, @email_body;
+
+        COMMIT TRANSACTION;
+
+		DECLARE @message VARCHAR(100) = CONCAT('An password reset link has been sent to ', @user_email, ' account.');
+		SELECT @message AS message;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
 END
 GO
 CREATE OR ALTER PROCEDURE usp_reset_user_password
@@ -499,63 +440,42 @@ BEGIN
 
 	SELECT 'Password has been reseted successfully' AS message;
 END
---SP END--
-
---FUNCTION START--
---GO
---CREATE OR ALTER FUNCTION FN_GetUserById(@Id INT, @IsActive BIT = 1)
---RETURNS TABLE
---AS
---RETURN
---(
---	SELECT * FROM Users WHERE Id = @Id AND IsActive = @IsActive
---);
---GO
---CREATE OR ALTER FUNCTION FN_GetUsers(@IsActive BIT = 1)
---RETURNS TABLE
---AS
---RETURN
---(
---	SELECT * FROM Users WHERE IsActive = @IsActive
---);
---GO
---CREATE OR ALTER FUNCTION FN_GetRoleById(@Id INT)
---RETURNS TABLE
---AS
---RETURN
---(
---	SELECT * FROM Roles WHERE Id = @Id
---);
---GO
---CREATE OR ALTER FUNCTION FN_GetRoles()
---RETURNS TABLE
---AS
---RETURN
---(
---	SELECT * FROM Roles
---);
---GO
---CREATE OR ALTER FUNCTION FN_GetCategoryById(@Id INT)
---RETURNS TABLE
---AS
---RETURN
---(
---	SELECT * FROM Categories WHERE Id = @Id
---);
---GO
---CREATE OR ALTER FUNCTION FN_GetCategories()
---RETURNS TABLE
---AS
---RETURN
---(
---	SELECT * FROM Categories
---);
-
---FUNCTION END--
---INSERT START--
 GO
-EXEC usp_add_role 'admin';
-EXEC usp_add_role 'operator';
+CREATE OR ALTER PROCEDURE usp_send_email
+-- @generator-response None
+@user_email VARCHAR(50), @user_id INT, @template_id INT, @subject NVARCHAR(200), @body NVARCHAR(MAX)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SET XACT_ABORT ON;
+	BEGIN TRY
+		INSERT INTO email_logs (template_id, user_id) VALUES (@template_id, @user_id);
 
-EXEC usp_add_user 'operator','Operator@123', 2,'operator@yopmail.com';
---INSERT END--
+		DECLARE @email_log_id INT = SCOPE_IDENTITY();
+		DECLARE @mailitem_id INT;
+
+		EXEC msdb.dbo.sp_send_dbmail  
+				@profile_name = 'PMS_Email_Profile',
+				@recipients   = @user_email,
+				@subject      = @subject,  
+				@body         = @body,  
+				@body_format  = 'HTML',
+				@mailitem_id = @mailitem_id OUTPUT;
+
+		UPDATE email_logs
+		SET
+			status = 'Sent',
+			send_at = GETUTCDATE(),
+			mailitem_id = @mailitem_id
+		WHERE email_log_id = @email_log_id;
+	END TRY
+	BEGIN CATCH
+		UPDATE email_logs
+		SET
+			status = 'Failed',
+			error_number = ERROR_NUMBER(),
+			error_message = ERROR_MESSAGE()
+		WHERE email_log_id = @email_log_id;
+	END CATCH;
+END
+

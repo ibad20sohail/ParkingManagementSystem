@@ -20,92 +20,143 @@ public class UserRepository : IUserRepository
         _connection = connection;
     }
 
+
     public async Task<OperationResponse> AddUserAsync(AddUserRequest request)
     {
         var parameters = new DynamicParameters();
+
         parameters.Add("@user_name", request.UserName);
         parameters.Add("@password", request.Password);
         parameters.Add("@role_id", request.RoleId);
         parameters.Add("@email", request.Email);
         parameters.Add("@contact_no", request.ContactNo);
 
+
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_add_user",
             parameters,
             commandType: CommandType.StoredProcedure);
+
     }
+
+
 
     public async Task<OperationResponse> DeleteUserAsync(DeleteUserRequest request)
     {
         var parameters = new DynamicParameters();
+
         parameters.Add("@user_id", request.UserId);
+
 
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_delete_user",
             parameters,
             commandType: CommandType.StoredProcedure);
+
     }
+
+
 
     public async Task<OperationResponse> EditUserAsync(EditUserRequest request)
     {
         var parameters = new DynamicParameters();
+
         parameters.Add("@user_id", request.UserId);
         parameters.Add("@user_name", request.UserName);
         parameters.Add("@old_password", request.OldPassword);
         parameters.Add("@new_password", request.NewPassword);
         parameters.Add("@confirm_new_password", request.ConfirmNewPassword);
 
+
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_edit_user",
             parameters,
             commandType: CommandType.StoredProcedure);
+
     }
+
+
+
+    public async Task<GetUserByIdResponse> GetUserByIdAsync(GetUserByIdRequest request)
+    {
+        var parameters = new DynamicParameters();
+
+        parameters.Add("@user_id", request.UserId);
+
+
+        return await _connection.QueryFirstOrDefaultAsync<GetUserByIdResponse>(
+            "usp_get_user_by_id",
+            parameters,
+            commandType: CommandType.StoredProcedure);
+
+    }
+
+
 
     public async Task<GetUserByUsernameResponse> GetUserByUsernameAsync(GetUserByUsernameRequest request)
     {
         var parameters = new DynamicParameters();
+
         parameters.Add("@user_name", request.UserName);
+
 
         return await _connection.QueryFirstOrDefaultAsync<GetUserByUsernameResponse>(
             "usp_get_user_by_username",
             parameters,
             commandType: CommandType.StoredProcedure);
+
     }
+
+
 
     public async Task<LoginUserResponse> LoginUserAsync(LoginUserRequest request)
     {
         var parameters = new DynamicParameters();
+
         parameters.Add("@user_name", request.UserName);
         parameters.Add("@password", request.Password);
+
 
         return await _connection.QueryFirstOrDefaultAsync<LoginUserResponse>(
             "usp_login_user",
             parameters,
             commandType: CommandType.StoredProcedure);
+
     }
+
+
 
     public async Task<OperationResponse> LogoutUserAsync(LogoutUserRequest request)
     {
         var parameters = new DynamicParameters();
+
         parameters.Add("@user_id", request.UserId);
+
 
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_logout_user",
             parameters,
             commandType: CommandType.StoredProcedure);
+
     }
+
+
 
     public async Task<OperationResponse> ResetUserPasswordAsync(ResetUserPasswordRequest request)
     {
         var parameters = new DynamicParameters();
+
         parameters.Add("@identifier", request.Identifier);
         parameters.Add("@new_password", request.NewPassword);
         parameters.Add("@confirm_password", request.ConfirmPassword);
+
 
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_reset_user_password",
             parameters,
             commandType: CommandType.StoredProcedure);
+
     }
+
 
 }

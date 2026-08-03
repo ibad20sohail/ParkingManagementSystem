@@ -16,41 +16,29 @@ namespace PMS.Infrastructure.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IResetPasswordLinkRepository _resetPasswordLinkRepository;
-        private readonly IEmailService _emailService;
         private readonly ApplicationParameters _settings;
 
-        public AuthService(IUserRepository userRepository, IResetPasswordLinkRepository resetPasswordLinkRepository, IEmailService emailService, IOptions<ApplicationParameters> settings)
+        public AuthService(IUserRepository userRepository, IResetPasswordLinkRepository resetPasswordLinkRepository, IOptions<ApplicationParameters> settings)
         {
             _userRepository = userRepository;
             _resetPasswordLinkRepository = resetPasswordLinkRepository;
-            _emailService = emailService;
             _settings = settings.Value;
         }
 
-        public async Task<AppResponse<GetUserByUsernameResponse>> ForgetPasswordAsync(GetUserByUsernameRequest request)
+        public async Task<AppResponse<OperationResponse>> ForgetPasswordAsync(GetUserByUsernameRequest request)
         {
             try
             {
-                var user = await _userRepository.GetUserByUsernameAsync(request);
-                var link = await _resetPasswordLinkRepository.GenerateResetPasswordLinkAsync(
-                    new GenerateResetPasswordLinkRequest { UserId = user.UserId });
-
-                var emailBody = await _emailService.GetTemplateAsync(
-                    Cons.ForgetPasswordEmailTemplateName,
-                    new Dictionary<string, string>
-                    {
-                        ["user_name"] = user.UserName,
-                        ["reset_link"] = $"{_settings.Domain}{link.GeneratedLink}",
-                        ["expire_in"] = $"{link.ExpireIn} minutes"
-                    });
-
-                await _emailService.SendAsync(user.Email, "Reset Password", emailBody);
-
-                return AppResponse<GetUserByUsernameResponse>.Success(user);
+                var result = await _resetPasswordLinkRepository.GenerateResetPasswordLinkAsync(new GenerateResetPasswordLinkRequest 
+                { 
+                    BaseUrl = _settings.BaseUrl,
+                    UserName = request.UserName 
+                });
+                return AppResponse<OperationResponse>.Success(result);
             }
             catch (SqlException ex)
             {
-                return AppResponse<GetUserByUsernameResponse>.Failure(ex.Message);
+                return AppResponse<OperationResponse>.Failure(ex.Message);
             }
         }
 

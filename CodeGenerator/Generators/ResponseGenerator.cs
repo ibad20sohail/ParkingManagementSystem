@@ -1,4 +1,5 @@
 ﻿using CodeGenerator.Constants;
+using CodeGenerator.Enums;
 using CodeGenerator.Helpers;
 using CodeGenerator.Models;
 using Scriban;
@@ -27,7 +28,7 @@ public class ResponseGenerator : BaseGenerator
         Directory.CreateDirectory(outputFolder);
 
         var expectedFiles = procedures
-           .Where(p => !p.UsesOperationResponse)
+           .Where(p => p.ResponseType != GeneratorResponseType.OperationResponse)
            .Where(p => p.ResultColumns.Count > 0)
            .Select(p => $"{p.Action}{p.Entity}{p.Suffix}{Cons.Response}.cs")
            .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -44,7 +45,7 @@ public class ResponseGenerator : BaseGenerator
 
         foreach (var procedure in procedures)
         {
-            if (procedure.UsesOperationResponse)
+            if (procedure.ResponseType == GeneratorResponseType.OperationResponse)
                 continue;
 
             // only generate response classes when procedure returns data

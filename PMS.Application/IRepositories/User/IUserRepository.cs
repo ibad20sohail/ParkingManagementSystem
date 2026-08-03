@@ -10,17 +10,27 @@ namespace PMS.Application.IRepositories.User;
 
 public interface IUserRepository
 {
+
     Task<OperationResponse> AddUserAsync(AddUserRequest request);
+
 
     Task<OperationResponse> DeleteUserAsync(DeleteUserRequest request);
 
+
     Task<OperationResponse> EditUserAsync(EditUserRequest request);
+
+
+    Task<GetUserByIdResponse> GetUserByIdAsync(GetUserByIdRequest request);
+
 
     Task<GetUserByUsernameResponse> GetUserByUsernameAsync(GetUserByUsernameRequest request);
 
+
     Task<LoginUserResponse> LoginUserAsync(LoginUserRequest request);
 
+
     Task<OperationResponse> LogoutUserAsync(LogoutUserRequest request);
+
 
     Task<OperationResponse> ResetUserPasswordAsync(ResetUserPasswordRequest request);
 

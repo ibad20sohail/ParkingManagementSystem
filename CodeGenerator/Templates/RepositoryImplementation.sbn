@@ -19,39 +19,65 @@ public class {{class_name}} : {{interface_name}}
     }
 
 {{~ for method in methods ~}}
+
 {{~ if method.request_type ~}}
-    public async Task<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}> {{method.name}}({{method.request_type}} request)
+    public async Task{{ if method.has_response }}<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}>{{ end }} {{method.name}}({{method.request_type}} request)
     {
         var parameters = new DynamicParameters();
+
 {{~ for parameter in method.parameters ~}}
         parameters.Add("@{{parameter.sql_name}}", request.{{parameter.property_name}});
 {{~ end ~}}
 
-{{~ if method.returns_collection ~}}
+{{~ if method.has_response ~}}
+
+    {{~ if method.returns_collection ~}}
         return (await _connection.QueryAsync<{{method.response_type}}>(
             "{{method.procedure_name}}",
             parameters,
             commandType: CommandType.StoredProcedure)).ToList();
-{{~ else ~}}
+    {{~ else ~}}
         return await _connection.QueryFirstOrDefaultAsync<{{method.response_type}}>(
             "{{method.procedure_name}}",
             parameters,
             commandType: CommandType.StoredProcedure);
+    {{~ end ~}}
+
+{{~ else ~}}
+
+        await _connection.ExecuteAsync(
+            "{{method.procedure_name}}",
+            parameters,
+            commandType: CommandType.StoredProcedure);
+
 {{~ end ~}}
     }
+
 {{~ else ~}}
-    public async Task<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}> {{method.name}}()
+
+    public async Task{{ if method.has_response }}<{{ if method.returns_collection }}List<{{method.response_type}}>{{ else }}{{method.response_type}}{{ end }}>{{ end }} {{method.name}}()
     {
-{{~ if method.returns_collection ~}}
+{{~ if method.has_response ~}}
+
+    {{~ if method.returns_collection ~}}
         return (await _connection.QueryAsync<{{method.response_type}}>(
             "{{method.procedure_name}}",
             commandType: CommandType.StoredProcedure)).ToList();
-{{~ else ~}}
+    {{~ else ~}}
         return await _connection.QueryFirstOrDefaultAsync<{{method.response_type}}>(
             "{{method.procedure_name}}",
             commandType: CommandType.StoredProcedure);
+    {{~ end ~}}
+
+{{~ else ~}}
+
+        await _connection.ExecuteAsync(
+            "{{method.procedure_name}}",
+            commandType: CommandType.StoredProcedure);
+
 {{~ end ~}}
     }
+
 {{~ end ~}}
 
 {{~ end ~}}

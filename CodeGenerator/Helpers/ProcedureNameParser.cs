@@ -50,25 +50,35 @@ public static class ProcedureNameParser
             });
 
 
-        if (matchedTable is null)
+        string entity;
+        string remainingAfterEntity;
+
+        if (matchedTable is not null)
         {
-            throw new Exception(
-                $"Unable to determine entity for procedure '{procedureName}'.");
+            // Keep entity name same as database entity
+            var normalizedEntity = NamingHelper.NormalizeEntityName(matchedTable);
+
+            entity = NamingHelper.ToPascalCase(normalizedEntity);
+
+            // Remove matched entity part to get operation suffix
+            remainingAfterEntity = remaining[normalizedEntity.Length..];
         }
+        else
+        {
+            // Fallback:
+            // usp_abc_def -> Entity = Def
+            // usp_login_user -> Entity = User
+            var parts = remaining.Split('_', StringSplitOptions.RemoveEmptyEntries);
 
+            if (parts.Length == 0)
+            {
+                throw new Exception(
+                    $"Unable to determine entity for procedure '{procedureName}'.");
+            }
 
-        // Keep entity name same as database entity
-        // users -> Users
-        // parking_spaces -> ParkingSpaces
-        var entity = NamingHelper.ToPascalCase(NamingHelper.NormalizeEntityName(matchedTable));
-
-        // Remove matched entity part to get operation suffix
-        var normalizedEntity =
-            NamingHelper.NormalizeEntityName(matchedTable);
-
-
-        var remainingAfterEntity =
-            remaining[normalizedEntity.Length..];
+            entity = NamingHelper.ToPascalCase(parts[^1]);
+            remainingAfterEntity = string.Empty;
+        }
 
 
         // _by_id -> ById

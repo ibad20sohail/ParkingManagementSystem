@@ -20,38 +20,53 @@ public class CategoryRepository : ICategoryRepository
         _connection = connection;
     }
 
+
     public async Task<OperationResponse> AddCategoryAsync(AddCategoryRequest request)
     {
         var parameters = new DynamicParameters();
+
         parameters.Add("@name", request.Name);
+
 
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_add_category",
             parameters,
             commandType: CommandType.StoredProcedure);
+
     }
+
+
 
     public async Task<OperationResponse> DeleteCategoryAsync(DeleteCategoryRequest request)
     {
         var parameters = new DynamicParameters();
+
         parameters.Add("@category_id", request.CategoryId);
+
 
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_delete_category",
             parameters,
             commandType: CommandType.StoredProcedure);
+
     }
+
+
 
     public async Task<OperationResponse> EditCategoryAsync(EditCategoryRequest request)
     {
         var parameters = new DynamicParameters();
+
         parameters.Add("@category_id", request.CategoryId);
         parameters.Add("@name", request.Name);
+
 
         return await _connection.QueryFirstOrDefaultAsync<OperationResponse>(
             "usp_edit_category",
             parameters,
             commandType: CommandType.StoredProcedure);
+
     }
+
 
 }

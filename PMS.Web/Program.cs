@@ -59,7 +59,7 @@ builder.Services.AddRepositories();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddTransient<ICookieAuthenticationService, CookieAuthenticationService>();
-builder.Services.AddTransient<IEmailService, EmailService>();
+//builder.Services.AddTransient<IEmailService, EmailService>();
 
 //Global exception handler
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

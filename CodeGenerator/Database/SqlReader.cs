@@ -1,7 +1,9 @@
-﻿using CodeGenerator.Helpers;
+﻿using CodeGenerator.Enums;
+using CodeGenerator.Helpers;
 using CodeGenerator.Models;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Text.RegularExpressions;
 
 namespace CodeGenerator.Database
 {
@@ -228,6 +230,32 @@ namespace CodeGenerator.Database
 
             return procedures;
         }
+        public async Task<string?> GetProcedureGeneratorResponseAsync(string procedureName)
+        {
+            using var connection = CreateConnection();
+            await connection.OpenAsync();
+
+            const string sql = @"
+        SELECT sm.definition
+        FROM sys.sql_modules sm
+        INNER JOIN sys.objects o
+            ON sm.object_id = o.object_id
+        WHERE o.name = @Procedure";
+
+            using var cmd = new SqlCommand(sql, connection);
+            cmd.Parameters.AddWithValue("@Procedure", procedureName);
+
+            var definition = await cmd.ExecuteScalarAsync() as string;
+            Console.WriteLine($"\n--- Procedure: {procedureName} ---\n\n{definition}");
+            if (string.IsNullOrWhiteSpace(definition))
+                return null;
+
+            var match = Match(definition);
+
+            return match.Success
+                ? match.Groups[1].Value
+                : null;
+        }
         public async Task<List<ParameterMetadata>> GetProcedureParametersAsync(string procedureName)
         {
             var parameters = new List<ParameterMetadata>();
@@ -283,6 +311,26 @@ namespace CodeGenerator.Database
 
                 var parameters = await GetProcedureParametersAsync(procedure);
                 var resultColumns = await GetProcedureResultColumnsAsync(procedure);
+                var generatorResponse = await GetProcedureGeneratorResponseAsync(procedure);
+
+                GeneratorResponseType responseType;
+                if (!string.IsNullOrWhiteSpace(generatorResponse) && Enum.TryParse(generatorResponse, true, out GeneratorResponseType parsedEnum))
+                {
+                    responseType = parsedEnum;
+                }
+                else if (resultColumns.Count == 1 && resultColumns[0].Name.Equals("message", StringComparison.OrdinalIgnoreCase))
+                {
+                    responseType = GeneratorResponseType.OperationResponse;
+                }
+                else if (resultColumns.Count == 0)
+                {
+                    responseType = GeneratorResponseType.None;
+                }
+                else
+                {
+                    responseType = GeneratorResponseType.Auto;
+                }
+
                 result.Add(new ProcedureMetadata
                 {
                     Name = procedure,
@@ -291,7 +339,8 @@ namespace CodeGenerator.Database
                     ReturnsCollection = parsed.Action.Equals("Get", StringComparison.OrdinalIgnoreCase) && NamingHelper.IsPlural(parsed.Entity),
                     Parameters = parameters,
                     ResultColumns = resultColumns,
-                    Suffix = parsed.Suffix
+                    Suffix = parsed.Suffix,
+                    ResponseType = responseType,
                 });
             }
 
@@ -302,30 +351,37 @@ namespace CodeGenerator.Database
             var columns = new List<ResultColumnMetadata>();
 
             using var connection = CreateConnection();
-
             await connection.OpenAsync();
 
             var sql = @"
-                SELECT
-                    name,
-                    system_type_name,
-                    is_nullable
-                FROM sys.dm_exec_describe_first_result_set_for_object
-                (
-                    OBJECT_ID(@Procedure),
-                    NULL
-                )
-                WHERE is_hidden = 0
-                ORDER BY column_ordinal";
+        SELECT
+            name,
+            system_type_name,
+            is_nullable,
+            error_number,
+            error_message
+        FROM sys.dm_exec_describe_first_result_set_for_object
+        (
+            OBJECT_ID(@Procedure),
+            NULL
+        )
+        WHERE is_hidden = 0
+        ORDER BY column_ordinal";
 
             using var cmd = new SqlCommand(sql, connection);
-
             cmd.Parameters.AddWithValue("@Procedure", procedureName);
 
             using var reader = await cmd.ExecuteReaderAsync();
 
             while (await reader.ReadAsync())
             {
+                if (!reader.IsDBNull(3))
+                {
+                    throw new Exception(
+                        $"Unable to determine result set for '{procedureName}'.{Environment.NewLine}" +
+                        reader.GetString(4));
+                }
+
                 columns.Add(new ResultColumnMetadata
                 {
                     Name = reader.GetString(0),
@@ -338,10 +394,8 @@ namespace CodeGenerator.Database
         }
         #endregion 
 
-        private SqlConnection CreateConnection()
-        {
-            return new SqlConnection(_connectionString);
-        }
+        private Match Match(string definition) => Regex.Match(definition, @"@generator-response\s+([A-Za-z0-9_]+)", RegexOptions.IgnoreCase);
+        private SqlConnection CreateConnection() => new SqlConnection(_connectionString);
 
     }
 }
