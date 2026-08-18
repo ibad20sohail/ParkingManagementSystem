@@ -37,7 +37,13 @@ BEGIN
         @username = 'ibad20sohail@gmail.com',              -- Your Username
         @password = '$(SMTP_PASSWORD)';                    -- Secure runtime variable injection
 END
-
+ELSE
+BEGIN
+    EXEC msdb.dbo.sysmail_update_account_sp
+        @account_name = 'PMS_Gmail_Account',
+        @username = 'ibad20sohail@gmail.com',              -- Your Username
+        @password = '$(SMTP_PASSWORD)';                    -- Secure runtime variable injection
+END
 -- 3. Create the Mail Profile
 IF NOT EXISTS (SELECT 1 FROM msdb.dbo.sysmail_profile WHERE name = 'PMS_Email_Profile')
 BEGIN

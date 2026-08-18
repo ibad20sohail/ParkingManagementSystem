@@ -77,7 +77,7 @@ public class AuthController : Controller
     public async Task<IActionResult> PostResetPassword(ResetUserPasswordRequest request)
     {
         if (!ModelState.IsValid)
-            return RedirectToAction("ResetPassword",request);
+            return RedirectToAction("ResetPassword", request);
 
         var result = await _authService.ResetPasswordAsync(request);
         if (!result.IsSuccess)
@@ -96,13 +96,13 @@ public class AuthController : Controller
     {
         var claims = User.GetUserInformation();
 
-        var result = await _authService.LogoutAsync(new LogoutUserRequest { UserId = claims.UserId});
+        var result = await _authService.LogoutAsync(new LogoutUserRequest { UserId = claims.UserId });
         if (!result.IsSuccess)
         {
             TempData[Cons.Error] = result.Message;
-            return RedirectToAction("Index","Home");
+            return RedirectToAction("Index", "Home");
         }
-        
+
         TempData[Cons.Success] = $"{result.Model.Message}";
         await _cookieAuthenticationService.SignOutAsync(HttpContext);
 
