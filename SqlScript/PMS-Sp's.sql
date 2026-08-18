@@ -346,7 +346,7 @@ BEGIN
 
     IF @user_id IS NULL OR @user_id <= 0
     BEGIN
-        ;THROW 51000, 'User account is invalid or does not exist.', 1;
+        ;THROW 50001, 'User account is invalid or does not exist.', 1;
     END
 
     SET @base_url = CASE WHEN RIGHT(@base_url, 1) = '/' THEN LEFT(@base_url, LEN(@base_url) - 1) ELSE @base_url END;
@@ -359,7 +359,7 @@ BEGIN
         VALUES (@user_id, @expire_at, @generated_link, @identifier);
 		
 		SELECT
-			@template_id = @template_id,
+			@template_id = template_id,
             @email_subject = subject, 
             @email_body = body 
         FROM templates 
@@ -367,7 +367,7 @@ BEGIN
 
         IF NULLIF(@email_body, '') IS NULL OR NULLIF(@email_subject, '') IS NULL
         BEGIN
-            ;THROW 51001, 'Email notification dispatch failed: Missing communication asset template.', 1;
+            ;THROW 50001, 'Email notification dispatch failed: Missing communication asset template.', 2;
         END
 
         SET @email_body = REPLACE(REPLACE(REPLACE(@email_body, '{{user_name}}', @user_name), '{{reset_link}}', @generated_link), '{{expire_in}}', CAST(@expire_minutes AS VARCHAR(10)));        
